@@ -1,0 +1,456 @@
+/* Sky Hunter - Chicken Shooter Game Styles */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#game-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* UI Overlay */
+#ui-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Menu Screens */
+.menu-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+    pointer-events: none;
+}
+
+.menu-screen.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.menu-content {
+    text-align: center;
+    color: #fff;
+    max-width: 500px;
+    padding: 40px;
+    animation: fadeInUp 0.5s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Title */
+.game-title {
+    font-size: 4.5rem;
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    background: linear-gradient(180deg, #FFD700 0%, #FF8C00 50%, #FF4500 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+    filter: drop-shadow(0 4px 8px rgba(255, 140, 0, 0.4));
+    margin-bottom: 8px;
+    line-height: 1.1;
+}
+
+.game-subtitle {
+    font-size: 1.1rem;
+    color: #aab;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 40px;
+}
+
+/* Buttons */
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 14px 48px;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 240px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn:hover::after {
+    left: 100%;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #FF6B35, #FF4500);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(255, 69, 0, 0.4);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(255, 69, 0, 0.6);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #2a6bcc, #1a4a9c);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(30, 80, 180, 0.3);
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(30, 80, 180, 0.5);
+}
+
+.btn-tertiary {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ccc;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.btn-tertiary:hover {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+/* High Score Display */
+.high-score-display {
+    margin-top: 32px;
+    font-size: 0.9rem;
+    color: #888;
+    letter-spacing: 0.15em;
+}
+
+#high-score-value {
+    color: #FFD700;
+    font-weight: 700;
+}
+
+/* How To Play */
+.how-to-content {
+    max-width: 550px;
+}
+
+.how-to-content h2 {
+    font-size: 2rem;
+    margin-bottom: 24px;
+    letter-spacing: 0.1em;
+}
+
+.instructions {
+    text-align: left;
+    margin-bottom: 30px;
+}
+
+.instruction-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.instruction-item .icon {
+    font-size: 1.5rem;
+    width: 40px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.instruction-item p {
+    font-size: 0.95rem;
+    color: #bbb;
+    line-height: 1.4;
+}
+
+.instruction-item strong {
+    color: #fff;
+}
+
+/* Game Over Stats */
+.final-stats {
+    margin: 24px 0;
+    text-align: left;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    font-size: 1rem;
+}
+
+.stat-row span:first-child {
+    color: #999;
+}
+
+.stat-row span:last-child {
+    color: #fff;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.stat-row.highlight {
+    border-bottom: none;
+    background: rgba(255, 215, 0, 0.08);
+    border-radius: 6px;
+    margin-top: 8px;
+}
+
+.stat-row.highlight span:first-child {
+    color: #FFD700;
+}
+
+.stat-row.highlight span:last-child {
+    color: #FFD700;
+}
+
+/* HUD */
+#hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    pointer-events: none;
+    z-index: 20;
+    padding: 12px 20px;
+    transition: opacity 0.3s ease;
+}
+
+#hud.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.hud-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.hud-left, .hud-center, .hud-right {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.hud-right {
+    align-items: center;
+}
+
+.hud-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 70px;
+}
+
+.hud-label {
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.hud-value {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    transition: transform 0.15s ease, color 0.3s ease;
+    font-variant-numeric: tabular-nums;
+}
+
+.hud-pause-btn {
+    pointer-events: auto;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.hud-pause-btn:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+/* Combo Bar */
+.combo-bar-container {
+    width: 100%;
+    height: 3px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+.combo-bar {
+    height: 100%;
+    width: 0%;
+    background: #44AAFF;
+    border-radius: 2px;
+    transition: width 0.1s linear, background-color 0.3s ease;
+    box-shadow: 0 0 8px rgba(68, 170, 255, 0.5);
+}
+
+/* Power-up Indicator */
+.power-up-indicator {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+    animation: fadeInUp 0.3s ease;
+}
+
+.power-up-indicator.hidden {
+    display: none;
+}
+
+#power-up-name {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-shadow: 0 0 10px currentColor;
+}
+
+.power-up-timer-bar {
+    width: 120px;
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.power-up-timer-fill {
+    height: 100%;
+    width: 100%;
+    border-radius: 2px;
+    transition: width 0.1s linear;
+}
+
+/* Animations */
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .game-title {
+        font-size: 2.8rem;
+    }
+
+    .game-subtitle {
+        font-size: 0.85rem;
+    }
+
+    .btn {
+        padding: 12px 36px;
+        font-size: 0.9rem;
+        min-width: 200px;
+    }
+
+    .hud-value {
+        font-size: 1.2rem;
+    }
+
+    .menu-content {
+        padding: 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-title {
+        font-size: 2rem;
+    }
+
+    .hud-top {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .hud-item {
+        min-width: 50px;
+    }
+}

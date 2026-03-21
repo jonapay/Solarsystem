@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sky Hunter - Chicken Shooter</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+        <div id="ui-overlay">
+            <!-- Main Menu -->
+            <div id="main-menu" class="menu-screen active">
+                <div class="menu-content">
+                    <h1 class="game-title">SKY HUNTER</h1>
+                    <p class="game-subtitle">The Ultimate Chicken Shooter</p>
+                    <div class="menu-buttons">
+                        <button class="btn btn-primary" id="btn-timed">TIMED MODE</button>
+                        <button class="btn btn-secondary" id="btn-endless">ENDLESS MODE</button>
+                        <button class="btn btn-tertiary" id="btn-how-to">HOW TO PLAY</button>
+                    </div>
+                    <div class="high-score-display">
+                        <span>HIGH SCORE: <span id="high-score-value">0</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- How To Play -->
+            <div id="how-to-screen" class="menu-screen">
+                <div class="menu-content how-to-content">
+                    <h2>HOW TO PLAY</h2>
+                    <div class="instructions">
+                        <div class="instruction-item">
+                            <span class="icon">&#127919;</span>
+                            <p><strong>Click</strong> to shoot targets</p>
+                        </div>
+                        <div class="instruction-item">
+                            <span class="icon">&#9733;</span>
+                            <p>Hit the <strong>center</strong> for critical damage</p>
+                        </div>
+                        <div class="instruction-item">
+                            <span class="icon">&#9889;</span>
+                            <p>Chain hits for <strong>combo multipliers</strong></p>
+                        </div>
+                        <div class="instruction-item">
+                            <span class="icon">&#128163;</span>
+                            <p>Different targets have different <strong>point values</strong></p>
+                        </div>
+                        <div class="instruction-item">
+                            <span class="icon">&#127873;</span>
+                            <p>Collect <strong>power-ups</strong> for special abilities</p>
+                        </div>
+                        <div class="instruction-item">
+                            <span class="icon">&#10060;</span>
+                            <p>Missing shots <strong>reduces accuracy</strong> and score</p>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="btn-back-menu">BACK</button>
+                </div>
+            </div>
+
+            <!-- Pause Screen -->
+            <div id="pause-screen" class="menu-screen">
+                <div class="menu-content">
+                    <h2>PAUSED</h2>
+                    <div class="menu-buttons">
+                        <button class="btn btn-primary" id="btn-resume">RESUME</button>
+                        <button class="btn btn-secondary" id="btn-quit">QUIT TO MENU</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Over Screen -->
+            <div id="gameover-screen" class="menu-screen">
+                <div class="menu-content">
+                    <h2>GAME OVER</h2>
+                    <div class="final-stats">
+                        <div class="stat-row"><span>Final Score</span><span id="final-score">0</span></div>
+                        <div class="stat-row"><span>Accuracy</span><span id="final-accuracy">0%</span></div>
+                        <div class="stat-row"><span>Max Combo</span><span id="final-combo">0x</span></div>
+                        <div class="stat-row"><span>Targets Hit</span><span id="final-hits">0</span></div>
+                        <div class="stat-row highlight"><span>High Score</span><span id="final-high-score">0</span></div>
+                    </div>
+                    <div class="menu-buttons">
+                        <button class="btn btn-primary" id="btn-retry">PLAY AGAIN</button>
+                        <button class="btn btn-secondary" id="btn-menu">MAIN MENU</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HUD -->
+            <div id="hud" class="hidden">
+                <div class="hud-top">
+                    <div class="hud-left">
+                        <div class="hud-item">
+                            <span class="hud-label">SCORE</span>
+                            <span class="hud-value" id="hud-score">0</span>
+                        </div>
+                        <div class="hud-item">
+                            <span class="hud-label">COMBO</span>
+                            <span class="hud-value" id="hud-combo">1x</span>
+                        </div>
+                    </div>
+                    <div class="hud-center">
+                        <div class="hud-item">
+                            <span class="hud-label">TIME</span>
+                            <span class="hud-value" id="hud-time">60</span>
+                        </div>
+                    </div>
+                    <div class="hud-right">
+                        <div class="hud-item">
+                            <span class="hud-label">ACCURACY</span>
+                            <span class="hud-value" id="hud-accuracy">100%</span>
+                        </div>
+                        <button class="hud-pause-btn" id="btn-pause">| |</button>
+                    </div>
+                </div>
+                <div class="combo-bar-container">
+                    <div class="combo-bar" id="combo-bar"></div>
+                </div>
+                <div class="power-up-indicator hidden" id="power-up-indicator">
+                    <span id="power-up-name">SLOW MOTION</span>
+                    <div class="power-up-timer-bar"><div class="power-up-timer-fill" id="power-up-timer"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
