@@ -1,0 +1,3237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#FF4500">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="Sky Hunter - The Ultimate Chicken Shooter Browser Game">
+    <title>Sky Hunter - Chicken Shooter</title>
+    <link rel="manifest" href="manifest.json">
+    <style>/* Sky Hunter - Chicken Shooter Game Styles */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#game-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* UI Overlay */
+#ui-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Menu Screens */
+.menu-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+    pointer-events: none;
+}
+
+.menu-screen.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.menu-content {
+    text-align: center;
+    color: #fff;
+    max-width: 500px;
+    padding: 40px;
+    animation: fadeInUp 0.5s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Title */
+.game-title {
+    font-size: 4.5rem;
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    background: linear-gradient(180deg, #FFD700 0%, #FF8C00 50%, #FF4500 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+    filter: drop-shadow(0 4px 8px rgba(255, 140, 0, 0.4));
+    margin-bottom: 8px;
+    line-height: 1.1;
+}
+
+.game-subtitle {
+    font-size: 1.1rem;
+    color: #aab;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 40px;
+}
+
+/* Buttons */
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 14px 48px;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 240px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn:hover::after {
+    left: 100%;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #FF6B35, #FF4500);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(255, 69, 0, 0.4);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(255, 69, 0, 0.6);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #2a6bcc, #1a4a9c);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(30, 80, 180, 0.3);
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(30, 80, 180, 0.5);
+}
+
+.btn-tertiary {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ccc;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.btn-tertiary:hover {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+/* High Score Display */
+.high-score-display {
+    margin-top: 32px;
+    font-size: 0.9rem;
+    color: #888;
+    letter-spacing: 0.15em;
+}
+
+#high-score-value {
+    color: #FFD700;
+    font-weight: 700;
+}
+
+/* How To Play */
+.how-to-content {
+    max-width: 550px;
+}
+
+.how-to-content h2 {
+    font-size: 2rem;
+    margin-bottom: 24px;
+    letter-spacing: 0.1em;
+}
+
+.instructions {
+    text-align: left;
+    margin-bottom: 30px;
+}
+
+.instruction-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.instruction-item .icon {
+    font-size: 1.5rem;
+    width: 40px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.instruction-item p {
+    font-size: 0.95rem;
+    color: #bbb;
+    line-height: 1.4;
+}
+
+.instruction-item strong {
+    color: #fff;
+}
+
+/* Game Over Stats */
+.final-stats {
+    margin: 24px 0;
+    text-align: left;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    font-size: 1rem;
+}
+
+.stat-row span:first-child {
+    color: #999;
+}
+
+.stat-row span:last-child {
+    color: #fff;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.stat-row.highlight {
+    border-bottom: none;
+    background: rgba(255, 215, 0, 0.08);
+    border-radius: 6px;
+    margin-top: 8px;
+}
+
+.stat-row.highlight span:first-child {
+    color: #FFD700;
+}
+
+.stat-row.highlight span:last-child {
+    color: #FFD700;
+}
+
+/* HUD */
+#hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    pointer-events: none;
+    z-index: 20;
+    padding: 12px 20px;
+    transition: opacity 0.3s ease;
+}
+
+#hud.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.hud-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.hud-left, .hud-center, .hud-right {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.hud-right {
+    align-items: center;
+}
+
+.hud-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 70px;
+}
+
+.hud-label {
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.hud-value {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    transition: transform 0.15s ease, color 0.3s ease;
+    font-variant-numeric: tabular-nums;
+}
+
+.hud-pause-btn {
+    pointer-events: auto;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.hud-pause-btn:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+/* Combo Bar */
+.combo-bar-container {
+    width: 100%;
+    height: 3px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+.combo-bar {
+    height: 100%;
+    width: 0%;
+    background: #44AAFF;
+    border-radius: 2px;
+    transition: width 0.1s linear, background-color 0.3s ease;
+    box-shadow: 0 0 8px rgba(68, 170, 255, 0.5);
+}
+
+/* Power-up Indicator */
+.power-up-indicator {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+    animation: fadeInUp 0.3s ease;
+}
+
+.power-up-indicator.hidden {
+    display: none;
+}
+
+#power-up-name {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-shadow: 0 0 10px currentColor;
+}
+
+.power-up-timer-bar {
+    width: 120px;
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.power-up-timer-fill {
+    height: 100%;
+    width: 100%;
+    border-radius: 2px;
+    transition: width 0.1s linear;
+}
+
+/* Animations */
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .game-title {
+        font-size: 2.8rem;
+    }
+
+    .game-subtitle {
+        font-size: 0.85rem;
+    }
+
+    .btn {
+        padding: 12px 36px;
+        font-size: 0.9rem;
+        min-width: 200px;
+    }
+
+    .hud-value {
+        font-size: 1.2rem;
+    }
+
+    .menu-content {
+        padding: 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-title {
+        font-size: 2rem;
+    }
+
+    .hud-top {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .hud-item {
+        min-width: 50px;
+    }
+}
+</style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+        <div id="ui-overlay">
+            <!-- Main Menu -->
+            <div id="main-menu" class="menu-screen active">
+                <div class="menu-content">
+                    <h1 class="game-title">SKY HUNTER</h1>
+                    <p class="game-subtitle">The Ultimate Chicken Shooter</p>
+                    <div class="menu-buttons">
+                        <button class="btn btn-primary" id="btn-timed">TIMED MODE</button>
+                        <button class="btn btn-secondary" id="btn-endless">ENDLESS MODE</button>
+                        <button class="btn btn-tertiary" id="btn-how-to">HOW TO PLAY</button>
+                    </div>
+                    <div class="high-score-display">
+                        <span>HIGH SCORE: <span id="high-score-value">0</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- How To Play -->
+            <div id="how-to-screen" class="menu-screen">
+                <div class="menu-content how-to-content">
+                    <h2>HOW TO PLAY</h2>
+                    <div class="instructions">
+                        <div class="instruction-item">
+                            <span class="icon">&#127919;</span>
+                            <p><strong>Click</strong> to shoot targets</p>
+                        </div>
+                        <div class="instruction-item">
+                            <span class="icon">&#9733;</span>
+                            <p>Hit the <strong>center</strong> for critical damage</p>
+                        </div>
+                        <div class="instruction-item">
+                            <span class="icon">&#9889;</span>
+                            <p>Chain hits for <strong>combo multipliers</strong></p>
+                        </div>
+                        <div class="instruction-item">
+                            <span class="icon">&#128163;</span>
+                            <p>Different targets have different <strong>point values</strong></p>
+                        </div>
+                        <div class="instruction-item">
+                            <span class="icon">&#127873;</span>
+                            <p>Collect <strong>power-ups</strong> for special abilities</p>
+                        </div>
+                        <div class="instruction-item">
+                            <span class="icon">&#10060;</span>
+                            <p>Missing shots <strong>reduces accuracy</strong> and score</p>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="btn-back-menu">BACK</button>
+                </div>
+            </div>
+
+            <!-- Pause Screen -->
+            <div id="pause-screen" class="menu-screen">
+                <div class="menu-content">
+                    <h2>PAUSED</h2>
+                    <div class="menu-buttons">
+                        <button class="btn btn-primary" id="btn-resume">RESUME</button>
+                        <button class="btn btn-secondary" id="btn-quit">QUIT TO MENU</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Over Screen -->
+            <div id="gameover-screen" class="menu-screen">
+                <div class="menu-content">
+                    <h2>GAME OVER</h2>
+                    <div class="final-stats">
+                        <div class="stat-row"><span>Final Score</span><span id="final-score">0</span></div>
+                        <div class="stat-row"><span>Accuracy</span><span id="final-accuracy">0%</span></div>
+                        <div class="stat-row"><span>Max Combo</span><span id="final-combo">0x</span></div>
+                        <div class="stat-row"><span>Targets Hit</span><span id="final-hits">0</span></div>
+                        <div class="stat-row highlight"><span>High Score</span><span id="final-high-score">0</span></div>
+                    </div>
+                    <div class="menu-buttons">
+                        <button class="btn btn-primary" id="btn-retry">PLAY AGAIN</button>
+                        <button class="btn btn-secondary" id="btn-menu">MAIN MENU</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HUD -->
+            <div id="hud" class="hidden">
+                <div class="hud-top">
+                    <div class="hud-left">
+                        <div class="hud-item">
+                            <span class="hud-label">SCORE</span>
+                            <span class="hud-value" id="hud-score">0</span>
+                        </div>
+                        <div class="hud-item">
+                            <span class="hud-label">COMBO</span>
+                            <span class="hud-value" id="hud-combo">1x</span>
+                        </div>
+                    </div>
+                    <div class="hud-center">
+                        <div class="hud-item">
+                            <span class="hud-label">TIME</span>
+                            <span class="hud-value" id="hud-time">60</span>
+                        </div>
+                    </div>
+                    <div class="hud-right">
+                        <div class="hud-item">
+                            <span class="hud-label">ACCURACY</span>
+                            <span class="hud-value" id="hud-accuracy">100%</span>
+                        </div>
+                        <button class="hud-pause-btn" id="btn-pause">| |</button>
+                    </div>
+                </div>
+                <div class="combo-bar-container">
+                    <div class="combo-bar" id="combo-bar"></div>
+                </div>
+                <div class="power-up-indicator hidden" id="power-up-indicator">
+                    <span id="power-up-name">SLOW MOTION</span>
+                    <div class="power-up-timer-bar"><div class="power-up-timer-fill" id="power-up-timer"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>// Utility functions and math helpers
+
+function lerp(a, b, t) {
+    return a + (b - a) * t;
+}
+
+function clamp(val, min, max) {
+    return Math.max(min, Math.min(max, val));
+}
+
+function randomRange(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+function randomInt(min, max) {
+    return Math.floor(randomRange(min, max + 1));
+}
+
+function distance(x1, y1, x2, y2) {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
+// Easing functions
+const ease = {
+    linear: t => t,
+    inQuad: t => t * t,
+    outQuad: t => t * (2 - t),
+    inOutQuad: t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t,
+    inCubic: t => t * t * t,
+    outCubic: t => (--t) * t * t + 1,
+    inOutCubic: t => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1,
+    outBack: t => { const s = 1.70158; return (t -= 1) * t * ((s + 1) * t + s) + 1; },
+    outElastic: t => {
+        if (t === 0 || t === 1) return t;
+        return Math.pow(2, -10 * t) * Math.sin((t - 0.1) * 5 * Math.PI) + 1;
+    },
+    outBounce: t => {
+        if (t < 1 / 2.75) return 7.5625 * t * t;
+        if (t < 2 / 2.75) return 7.5625 * (t -= 1.5 / 2.75) * t + 0.75;
+        if (t < 2.5 / 2.75) return 7.5625 * (t -= 2.25 / 2.75) * t + 0.9375;
+        return 7.5625 * (t -= 2.625 / 2.75) * t + 0.984375;
+    }
+};
+
+// Color utilities
+function hslToRgb(h, s, l) {
+    let r, g, b;
+    if (s === 0) {
+        r = g = b = l;
+    } else {
+        const hue2rgb = (p, q, t) => {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1/6) return p + (q - p) * 6 * t;
+            if (t < 1/2) return q;
+            if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+            return p;
+        };
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+    }
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
+function rgbString(r, g, b, a = 1) {
+    return a < 1 ? `rgba(${r},${g},${b},${a})` : `rgb(${r},${g},${b})`;
+}
+
+// Bezier curve point calculation
+function bezierPoint(t, p0, p1, p2, p3) {
+    const u = 1 - t;
+    const tt = t * t;
+    const uu = u * u;
+    const uuu = uu * u;
+    const ttt = tt * t;
+    return {
+        x: uuu * p0.x + 3 * uu * t * p1.x + 3 * u * tt * p2.x + ttt * p3.x,
+        y: uuu * p0.y + 3 * uu * t * p1.y + 3 * u * tt * p2.y + ttt * p3.y
+    };
+}
+
+// Generate a random flight path using bezier curves
+function generateFlightPath(canvasW, canvasH, direction) {
+    const margin = 100;
+    const fromLeft = direction === 'left' || (direction === 'random' && Math.random() > 0.5);
+
+    const startX = fromLeft ? -margin : canvasW + margin;
+    const endX = fromLeft ? canvasW + margin : -margin;
+
+    const yRange = canvasH * 0.6;
+    const yOffset = canvasH * 0.08;
+
+    const startY = randomRange(yOffset, yOffset + yRange);
+    const endY = randomRange(yOffset, yOffset + yRange);
+
+    const cp1x = fromLeft ? canvasW * 0.25 : canvasW * 0.75;
+    const cp2x = fromLeft ? canvasW * 0.75 : canvasW * 0.25;
+    const cp1y = randomRange(yOffset, yOffset + yRange);
+    const cp2y = randomRange(yOffset, yOffset + yRange);
+
+    return {
+        p0: { x: startX, y: startY },
+        p1: { x: cp1x, y: cp1y },
+        p2: { x: cp2x, y: cp2y },
+        p3: { x: endX, y: endY },
+        fromLeft
+    };
+}
+
+// Object pool for performance
+class ObjectPool {
+    constructor(createFn, resetFn, initialSize = 50) {
+        this.createFn = createFn;
+        this.resetFn = resetFn;
+        this.pool = [];
+        this.active = [];
+        for (let i = 0; i < initialSize; i++) {
+            this.pool.push(createFn());
+        }
+    }
+
+    get(...args) {
+        let obj = this.pool.pop();
+        if (!obj) obj = this.createFn();
+        this.resetFn(obj, ...args);
+        this.active.push(obj);
+        return obj;
+    }
+
+    release(obj) {
+        const idx = this.active.indexOf(obj);
+        if (idx !== -1) {
+            this.active.splice(idx, 1);
+            this.pool.push(obj);
+        }
+    }
+
+    releaseAll() {
+        while (this.active.length) {
+            this.pool.push(this.active.pop());
+        }
+    }
+
+    getActive() {
+        return this.active;
+    }
+}
+
+// Audio System - Procedural sound generation using Web Audio API
+class AudioSystem {
+    constructor() {
+        this.ctx = null;
+        this.masterGain = null;
+        this.musicGain = null;
+        this.sfxGain = null;
+        this.initialized = false;
+        this.musicPlaying = false;
+        this.musicNodes = [];
+    }
+
+    init() {
+        if (this.initialized) return;
+        try {
+            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            this.masterGain = this.ctx.createGain();
+            this.masterGain.gain.value = 0.7;
+            this.masterGain.connect(this.ctx.destination);
+
+            this.musicGain = this.ctx.createGain();
+            this.musicGain.gain.value = 0.15;
+            this.musicGain.connect(this.masterGain);
+
+            this.sfxGain = this.ctx.createGain();
+            this.sfxGain.gain.value = 0.5;
+            this.sfxGain.connect(this.masterGain);
+
+            this.initialized = true;
+        } catch (e) {
+            console.warn('Web Audio API not available:', e);
+        }
+    }
+
+    resume() {
+        if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume();
+        }
+    }
+
+    playShoot() {
+        if (!this.initialized) return;
+        const t = this.ctx.currentTime;
+
+        // Gunshot: noise burst + low thump
+        const bufferSize = this.ctx.sampleRate * 0.08;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 3);
+        }
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(3000, t);
+        filter.frequency.exponentialRampToValueAtTime(300, t + 0.08);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.6, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.sfxGain);
+        noise.start(t);
+        noise.stop(t + 0.1);
+
+        // Low thump
+        const osc = this.ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(150, t);
+        osc.frequency.exponentialRampToValueAtTime(50, t + 0.08);
+        const oscGain = this.ctx.createGain();
+        oscGain.gain.setValueAtTime(0.4, t);
+        oscGain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+        osc.connect(oscGain);
+        oscGain.connect(this.sfxGain);
+        osc.start(t);
+        osc.stop(t + 0.12);
+    }
+
+    playHit() {
+        if (!this.initialized) return;
+        const t = this.ctx.currentTime;
+
+        // Impact sound: mid-frequency ping
+        const osc = this.ctx.createOscillator();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(800, t);
+        osc.frequency.exponentialRampToValueAtTime(200, t + 0.15);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.4, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+
+        osc.connect(gain);
+        gain.connect(this.sfxGain);
+        osc.start(t);
+        osc.stop(t + 0.2);
+
+        // Squawk
+        const squawk = this.ctx.createOscillator();
+        squawk.type = 'sawtooth';
+        squawk.frequency.setValueAtTime(600 + Math.random() * 400, t);
+        squawk.frequency.exponentialRampToValueAtTime(150, t + 0.12);
+
+        const sGain = this.ctx.createGain();
+        sGain.gain.setValueAtTime(0.15, t);
+        sGain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+
+        squawk.connect(sGain);
+        sGain.connect(this.sfxGain);
+        squawk.start(t);
+        squawk.stop(t + 0.15);
+    }
+
+    playCriticalHit() {
+        if (!this.initialized) return;
+        const t = this.ctx.currentTime;
+
+        // Higher pitch impact
+        const osc = this.ctx.createOscillator();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(1200, t);
+        osc.frequency.exponentialRampToValueAtTime(300, t + 0.2);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.3, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+
+        osc.connect(gain);
+        gain.connect(this.sfxGain);
+        osc.start(t);
+        osc.stop(t + 0.25);
+
+        // Double squawk
+        for (let i = 0; i < 2; i++) {
+            const s = this.ctx.createOscillator();
+            s.type = 'sawtooth';
+            s.frequency.setValueAtTime(900 + Math.random() * 300, t + i * 0.05);
+            s.frequency.exponentialRampToValueAtTime(100, t + 0.15 + i * 0.05);
+            const g = this.ctx.createGain();
+            g.gain.setValueAtTime(0.12, t + i * 0.05);
+            g.gain.exponentialRampToValueAtTime(0.001, t + 0.18 + i * 0.05);
+            s.connect(g);
+            g.connect(this.sfxGain);
+            s.start(t + i * 0.05);
+            s.stop(t + 0.2 + i * 0.05);
+        }
+    }
+
+    playMiss() {
+        if (!this.initialized) return;
+        const t = this.ctx.currentTime;
+
+        // Ricochet whizz
+        const osc = this.ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(2000, t);
+        osc.frequency.exponentialRampToValueAtTime(500, t + 0.15);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.08, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+
+        osc.connect(gain);
+        gain.connect(this.sfxGain);
+        osc.start(t);
+        osc.stop(t + 0.15);
+    }
+
+    playPowerUp() {
+        if (!this.initialized) return;
+        const t = this.ctx.currentTime;
+
+        // Rising arpeggio
+        const notes = [400, 500, 600, 800];
+        notes.forEach((freq, i) => {
+            const osc = this.ctx.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            const gain = this.ctx.createGain();
+            gain.gain.setValueAtTime(0, t + i * 0.06);
+            gain.gain.linearRampToValueAtTime(0.2, t + i * 0.06 + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.06 + 0.12);
+            osc.connect(gain);
+            gain.connect(this.sfxGain);
+            osc.start(t + i * 0.06);
+            osc.stop(t + i * 0.06 + 0.15);
+        });
+    }
+
+    playComboUp() {
+        if (!this.initialized) return;
+        const t = this.ctx.currentTime;
+
+        const osc = this.ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(500, t);
+        osc.frequency.linearRampToValueAtTime(1000, t + 0.1);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.15, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+
+        osc.connect(gain);
+        gain.connect(this.sfxGain);
+        osc.start(t);
+        osc.stop(t + 0.15);
+    }
+
+    playGameOver() {
+        if (!this.initialized) return;
+        const t = this.ctx.currentTime;
+
+        // Descending tones
+        const notes = [600, 500, 400, 250];
+        notes.forEach((freq, i) => {
+            const osc = this.ctx.createOscillator();
+            osc.type = 'triangle';
+            osc.frequency.value = freq;
+            const gain = this.ctx.createGain();
+            gain.gain.setValueAtTime(0, t + i * 0.2);
+            gain.gain.linearRampToValueAtTime(0.2, t + i * 0.2 + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.2 + 0.3);
+            osc.connect(gain);
+            gain.connect(this.sfxGain);
+            osc.start(t + i * 0.2);
+            osc.stop(t + i * 0.2 + 0.35);
+        });
+    }
+
+    startMusic() {
+        if (!this.initialized || this.musicPlaying) return;
+        this.musicPlaying = true;
+        this._playMusicLoop();
+    }
+
+    _playMusicLoop() {
+        if (!this.musicPlaying || !this.initialized) return;
+
+        const t = this.ctx.currentTime;
+        const bpm = 110;
+        const beatLen = 60 / bpm;
+        const barLen = beatLen * 4;
+
+        // Bass line pattern
+        const bassNotes = [
+            { note: 110, time: 0 },
+            { note: 110, time: beatLen },
+            { note: 130.81, time: beatLen * 2 },
+            { note: 146.83, time: beatLen * 3 },
+            { note: 130.81, time: barLen },
+            { note: 130.81, time: barLen + beatLen },
+            { note: 110, time: barLen + beatLen * 2 },
+            { note: 98, time: barLen + beatLen * 3 },
+        ];
+
+        bassNotes.forEach(({ note, time }) => {
+            const osc = this.ctx.createOscillator();
+            osc.type = 'triangle';
+            osc.frequency.value = note;
+
+            const gain = this.ctx.createGain();
+            gain.gain.setValueAtTime(0, t + time);
+            gain.gain.linearRampToValueAtTime(0.2, t + time + 0.02);
+            gain.gain.setValueAtTime(0.2, t + time + beatLen * 0.6);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + time + beatLen * 0.9);
+
+            osc.connect(gain);
+            gain.connect(this.musicGain);
+            osc.start(t + time);
+            osc.stop(t + time + beatLen);
+            this.musicNodes.push(osc);
+        });
+
+        // Hi-hat pattern
+        for (let i = 0; i < 16; i++) {
+            const time = i * (beatLen / 2);
+            const bufSize = this.ctx.sampleRate * 0.03;
+            const buf = this.ctx.createBuffer(1, bufSize, this.ctx.sampleRate);
+            const d = buf.getChannelData(0);
+            for (let j = 0; j < bufSize; j++) {
+                d[j] = (Math.random() * 2 - 1) * Math.pow(1 - j / bufSize, 8);
+            }
+            const src = this.ctx.createBufferSource();
+            src.buffer = buf;
+
+            const hpf = this.ctx.createBiquadFilter();
+            hpf.type = 'highpass';
+            hpf.frequency.value = 8000;
+
+            const gain = this.ctx.createGain();
+            const vol = (i % 2 === 0) ? 0.12 : 0.06;
+            gain.gain.setValueAtTime(vol, t + time);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + time + 0.04);
+
+            src.connect(hpf);
+            hpf.connect(gain);
+            gain.connect(this.musicGain);
+            src.start(t + time);
+            this.musicNodes.push(src);
+        }
+
+        // Schedule next loop
+        this._musicTimer = setTimeout(() => {
+            this._playMusicLoop();
+        }, (barLen * 2 - 0.1) * 1000);
+    }
+
+    stopMusic() {
+        this.musicPlaying = false;
+        if (this._musicTimer) {
+            clearTimeout(this._musicTimer);
+            this._musicTimer = null;
+        }
+        this.musicNodes.forEach(node => {
+            try { node.stop(); } catch (e) { /* already stopped */ }
+        });
+        this.musicNodes = [];
+    }
+
+    setMusicVolume(v) {
+        if (this.musicGain) this.musicGain.gain.value = v;
+    }
+
+    setSfxVolume(v) {
+        if (this.sfxGain) this.sfxGain.gain.value = v;
+    }
+}
+
+// Particle System - handles hit effects, feathers, explosions
+
+
+class Particle {
+    constructor() {
+        this.x = 0; this.y = 0;
+        this.vx = 0; this.vy = 0;
+        this.life = 0; this.maxLife = 0;
+        this.size = 0; this.startSize = 0; this.endSize = 0;
+        this.color = ''; this.alpha = 1;
+        this.rotation = 0; this.rotationSpeed = 0;
+        this.gravity = 0;
+        this.type = 'circle'; // circle, feather, spark, star
+        this.friction = 1;
+        this.active = false;
+    }
+}
+
+class ParticleSystem {
+    constructor() {
+        this.pool = new ObjectPool(
+            () => new Particle(),
+            (p, config) => {
+                if (!config) return;
+                Object.assign(p, config);
+                p.life = config.maxLife || 1;
+                p.startSize = config.size || 4;
+                p.endSize = config.endSize || 0;
+                p.alpha = 1;
+                p.active = true;
+            },
+            200
+        );
+    }
+
+    emit(x, y, config, count = 1) {
+        for (let i = 0; i < count; i++) {
+            const cfg = typeof config === 'function' ? config(i) : { ...config };
+            cfg.x = x + (cfg.offsetX || 0);
+            cfg.y = y + (cfg.offsetY || 0);
+            delete cfg.offsetX;
+            delete cfg.offsetY;
+            this.pool.get(cfg);
+        }
+    }
+
+    // Pre-built effect: hit impact
+    emitHit(x, y, color = '#FFD700') {
+        // Sparks
+        this.emit(x, y, () => {
+            const angle = randomRange(0, Math.PI * 2);
+            const speed = randomRange(100, 350);
+            return {
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                maxLife: randomRange(0.2, 0.5),
+                size: randomRange(2, 5),
+                endSize: 0,
+                color: color,
+                type: 'spark',
+                gravity: 200,
+                friction: 0.96,
+                rotation: 0,
+                rotationSpeed: 0
+            };
+        }, 12);
+
+        // Flash
+        this.emit(x, y, {
+            vx: 0, vy: 0,
+            maxLife: 0.15,
+            size: 30,
+            endSize: 60,
+            color: '#FFFFFF',
+            type: 'circle',
+            gravity: 0,
+            friction: 1,
+            rotation: 0,
+            rotationSpeed: 0
+        }, 1);
+    }
+
+    // Pre-built effect: critical hit
+    emitCritical(x, y) {
+        // Big explosion sparks
+        this.emit(x, y, () => {
+            const angle = randomRange(0, Math.PI * 2);
+            const speed = randomRange(150, 500);
+            return {
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                maxLife: randomRange(0.3, 0.7),
+                size: randomRange(3, 7),
+                endSize: 0,
+                color: ['#FF4444', '#FF8800', '#FFDD00', '#FFFFFF'][Math.floor(Math.random() * 4)],
+                type: 'spark',
+                gravity: 150,
+                friction: 0.95,
+                rotation: 0,
+                rotationSpeed: 0
+            };
+        }, 25);
+
+        // Stars
+        this.emit(x, y, () => {
+            const angle = randomRange(0, Math.PI * 2);
+            const speed = randomRange(50, 200);
+            return {
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                maxLife: randomRange(0.5, 1.0),
+                size: randomRange(8, 14),
+                endSize: 0,
+                color: '#FFD700',
+                type: 'star',
+                gravity: 80,
+                friction: 0.97,
+                rotation: randomRange(0, Math.PI * 2),
+                rotationSpeed: randomRange(-5, 5)
+            };
+        }, 6);
+
+        // Flash
+        this.emit(x, y, {
+            vx: 0, vy: 0,
+            maxLife: 0.2,
+            size: 50,
+            endSize: 100,
+            color: '#FFFFFF',
+            type: 'circle',
+            gravity: 0,
+            friction: 1,
+            rotation: 0,
+            rotationSpeed: 0
+        }, 1);
+    }
+
+    // Feather burst
+    emitFeathers(x, y, bodyColor = '#8B4513') {
+        const colors = [bodyColor, '#FFFFFF', '#F5DEB3', '#DEB887'];
+        this.emit(x, y, () => {
+            const angle = randomRange(0, Math.PI * 2);
+            const speed = randomRange(60, 200);
+            return {
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed - randomRange(30, 80),
+                maxLife: randomRange(0.8, 2.0),
+                size: randomRange(6, 14),
+                endSize: randomRange(3, 6),
+                color: colors[Math.floor(Math.random() * colors.length)],
+                type: 'feather',
+                gravity: randomRange(50, 120),
+                friction: 0.985,
+                rotation: randomRange(0, Math.PI * 2),
+                rotationSpeed: randomRange(-4, 4)
+            };
+        }, 10);
+    }
+
+    // Score popup particle
+    emitScorePopup(x, y, text, color = '#FFD700') {
+        const p = this.pool.get({
+            x, y,
+            vx: randomRange(-20, 20),
+            vy: -120,
+            maxLife: 1.2,
+            size: 20,
+            endSize: 16,
+            color: color,
+            type: 'text',
+            text: text,
+            gravity: -30,
+            friction: 0.98,
+            rotation: 0,
+            rotationSpeed: 0
+        });
+        return p;
+    }
+
+    // Miss indicator
+    emitMiss(x, y) {
+        // Dust puff
+        this.emit(x, y, () => {
+            const angle = randomRange(-Math.PI * 0.8, -Math.PI * 0.2);
+            const speed = randomRange(20, 60);
+            return {
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                maxLife: randomRange(0.3, 0.6),
+                size: randomRange(3, 8),
+                endSize: randomRange(10, 20),
+                color: '#886644',
+                type: 'circle',
+                gravity: -10,
+                friction: 0.95,
+                rotation: 0,
+                rotationSpeed: 0
+            };
+        }, 5);
+    }
+
+    update(dt) {
+        const particles = this.pool.getActive();
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.life -= dt;
+            if (p.life <= 0) {
+                p.active = false;
+                this.pool.release(p);
+                continue;
+            }
+
+            const lifeRatio = p.life / p.maxLife;
+
+            p.vy += p.gravity * dt;
+            p.vx *= p.friction;
+            p.vy *= p.friction;
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.rotation += p.rotationSpeed * dt;
+
+            p.size = lerp(p.endSize, p.startSize, lifeRatio);
+            p.alpha = Math.min(1, lifeRatio * 2);
+        }
+    }
+
+    render(ctx) {
+        const particles = this.pool.getActive();
+        ctx.save();
+
+        for (let i = 0; i < particles.length; i++) {
+            const p = particles[i];
+            if (!p.active) continue;
+
+            ctx.globalAlpha = p.alpha;
+
+            if (p.type === 'text') {
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.font = `bold ${Math.round(p.size)}px sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#000';
+                ctx.fillText(p.text, 1, 1);
+                ctx.fillStyle = p.color;
+                ctx.fillText(p.text, 0, 0);
+                ctx.restore();
+                continue;
+            }
+
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rotation);
+            ctx.fillStyle = p.color;
+
+            switch (p.type) {
+                case 'circle':
+                    ctx.beginPath();
+                    ctx.arc(0, 0, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                case 'spark':
+                    ctx.beginPath();
+                    ctx.moveTo(-p.size, 0);
+                    ctx.lineTo(0, -p.size * 0.3);
+                    ctx.lineTo(p.size * 1.5, 0);
+                    ctx.lineTo(0, p.size * 0.3);
+                    ctx.closePath();
+                    ctx.fill();
+                    break;
+
+                case 'feather':
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, p.size, p.size * 0.3, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Feather line
+                    ctx.strokeStyle = p.color;
+                    ctx.lineWidth = 0.5;
+                    ctx.beginPath();
+                    ctx.moveTo(-p.size, 0);
+                    ctx.lineTo(p.size, 0);
+                    ctx.stroke();
+                    break;
+
+                case 'star':
+                    this._drawStar(ctx, 0, 0, 5, p.size, p.size * 0.4);
+                    ctx.fill();
+                    break;
+
+                default:
+                    ctx.beginPath();
+                    ctx.arc(0, 0, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+            }
+
+            ctx.restore();
+        }
+
+        ctx.restore();
+    }
+
+    _drawStar(ctx, cx, cy, spikes, outerR, innerR) {
+        let rot = Math.PI / 2 * 3;
+        const step = Math.PI / spikes;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - outerR);
+        for (let i = 0; i < spikes; i++) {
+            ctx.lineTo(cx + Math.cos(rot) * outerR, cy + Math.sin(rot) * outerR);
+            rot += step;
+            ctx.lineTo(cx + Math.cos(rot) * innerR, cy + Math.sin(rot) * innerR);
+            rot += step;
+        }
+        ctx.lineTo(cx, cy - outerR);
+        ctx.closePath();
+    }
+
+    clear() {
+        this.pool.releaseAll();
+    }
+
+    get count() {
+        return this.pool.getActive().length;
+    }
+}
+
+// Entity System - Chickens, Power-ups, and target management
+
+
+// Chicken types configuration
+const CHICKEN_TYPES = {
+    normal: {
+        name: 'Normal',
+        color: '#CD853F',       // Peru brown
+        bodyColor: '#8B6914',
+        wingColor: '#A0522D',
+        combColor: '#DC143C',
+        beakColor: '#FFA500',
+        eyeColor: '#000000',
+        size: 1.0,
+        speed: 1.0,
+        health: 1,
+        points: 100,
+        spawnWeight: 50
+    },
+    fast: {
+        name: 'Speedy',
+        color: '#4169E1',
+        bodyColor: '#27408B',
+        wingColor: '#3A5FCD',
+        combColor: '#FF4500',
+        beakColor: '#FFD700',
+        eyeColor: '#000000',
+        size: 0.75,
+        speed: 1.8,
+        health: 1,
+        points: 200,
+        spawnWeight: 25
+    },
+    armored: {
+        name: 'Tank',
+        color: '#808080',
+        bodyColor: '#696969',
+        wingColor: '#778899',
+        combColor: '#B22222',
+        beakColor: '#DAA520',
+        eyeColor: '#FF0000',
+        size: 1.4,
+        speed: 0.6,
+        health: 3,
+        points: 300,
+        spawnWeight: 15
+    },
+    golden: {
+        name: 'Golden',
+        color: '#FFD700',
+        bodyColor: '#DAA520',
+        wingColor: '#FFC125',
+        combColor: '#FF6347',
+        beakColor: '#FF8C00',
+        eyeColor: '#800080',
+        size: 0.9,
+        speed: 2.2,
+        health: 1,
+        points: 500,
+        spawnWeight: 8
+    },
+    boss: {
+        name: 'Boss',
+        color: '#8B0000',
+        bodyColor: '#660000',
+        wingColor: '#A52A2A',
+        combColor: '#FF0000',
+        beakColor: '#FF4500',
+        eyeColor: '#FFFF00',
+        size: 2.0,
+        speed: 0.4,
+        health: 5,
+        points: 1000,
+        spawnWeight: 2
+    }
+};
+
+// Power-up types
+const POWERUP_TYPES = {
+    slowmo: {
+        name: 'SLOW MOTION',
+        color: '#00BFFF',
+        icon: '⏱',
+        duration: 5,
+        effect: 'slowmo'
+    },
+    multishot: {
+        name: 'MULTI-SHOT',
+        color: '#FF4500',
+        icon: '✦',
+        duration: 6,
+        effect: 'multishot'
+    },
+    scoreBoost: {
+        name: 'SCORE BOOST',
+        color: '#FFD700',
+        icon: '★',
+        duration: 8,
+        effect: 'scoreboost'
+    },
+    magnet: {
+        name: 'MAGNET',
+        color: '#FF69B4',
+        icon: '◎',
+        duration: 5,
+        effect: 'magnet'
+    }
+};
+
+class Chicken {
+    constructor() {
+        this.reset();
+    }
+
+    reset() {
+        this.x = 0;
+        this.y = 0;
+        this.type = CHICKEN_TYPES.normal;
+        this.typeName = 'normal';
+        this.health = 1;
+        this.maxHealth = 1;
+        this.alive = true;
+        this.active = false;
+
+        // Flight path
+        this.path = null;
+        this.pathProgress = 0;
+        this.pathSpeed = 0;
+        this.facingLeft = false;
+
+        // Animation
+        this.wingAngle = 0;
+        this.wingSpeed = 8;
+        this.bobOffset = 0;
+        this.bobSpeed = 3;
+        this.scale = 1;
+        this.hitFlash = 0;
+
+        // Death animation
+        this.dying = false;
+        this.deathTimer = 0;
+        this.deathVx = 0;
+        this.deathVy = 0;
+        this.deathRotation = 0;
+        this.deathRotSpeed = 0;
+
+        // Size
+        this.baseWidth = 50;
+        this.baseHeight = 40;
+        this.width = this.baseWidth;
+        this.height = this.baseHeight;
+    }
+
+    spawn(canvasW, canvasH, typeName, difficulty = 1) {
+        this.active = true;
+        this.alive = true;
+        this.dying = false;
+        this.deathTimer = 0;
+
+        const type = CHICKEN_TYPES[typeName] || CHICKEN_TYPES.normal;
+        this.type = type;
+        this.typeName = typeName;
+        this.health = type.health;
+        this.maxHealth = type.health;
+        this.scale = type.size;
+
+        this.width = this.baseWidth * this.scale;
+        this.height = this.baseHeight * this.scale;
+
+        // Generate flight path
+        this.path = generateFlightPath(canvasW, canvasH, 'random');
+        this.facingLeft = !this.path.fromLeft;
+        this.pathProgress = 0;
+        this.pathSpeed = (0.15 + difficulty * 0.02) * type.speed;
+
+        // Randomize wing animation offset
+        this.wingAngle = randomRange(0, Math.PI * 2);
+        this.wingSpeed = randomRange(6, 12);
+        this.bobOffset = randomRange(0, Math.PI * 2);
+        this.bobSpeed = randomRange(2, 5);
+
+        // Set initial position
+        const pos = bezierPoint(0, this.path.p0, this.path.p1, this.path.p2, this.path.p3);
+        this.x = pos.x;
+        this.y = pos.y;
+
+        this.hitFlash = 0;
+    }
+
+    update(dt, timeScale = 1) {
+        if (!this.active) return;
+
+        if (this.dying) {
+            this.deathTimer += dt;
+            this.deathVy += 600 * dt;
+            this.x += this.deathVx * dt;
+            this.y += this.deathVy * dt;
+            this.deathRotation += this.deathRotSpeed * dt;
+
+            if (this.deathTimer > 2.0) {
+                this.active = false;
+            }
+            return;
+        }
+
+        if (!this.alive) return;
+
+        // Advance on path
+        this.pathProgress += this.pathSpeed * dt * timeScale;
+
+        if (this.pathProgress >= 1) {
+            this.active = false;
+            return;
+        }
+
+        const pos = bezierPoint(
+            this.pathProgress,
+            this.path.p0, this.path.p1, this.path.p2, this.path.p3
+        );
+
+        // Determine facing direction from movement
+        if (pos.x > this.x + 0.5) this.facingLeft = false;
+        else if (pos.x < this.x - 0.5) this.facingLeft = true;
+
+        this.x = pos.x;
+        this.y = pos.y + Math.sin(this.bobOffset + performance.now() * 0.003 * this.bobSpeed) * 8;
+
+        // Wing animation
+        this.wingAngle = Math.sin(performance.now() * 0.01 * this.wingSpeed) * 0.6;
+
+        // Hit flash decay
+        if (this.hitFlash > 0) {
+            this.hitFlash -= dt * 5;
+        }
+    }
+
+    hit(damage = 1) {
+        if (!this.alive || this.dying) return false;
+
+        this.health -= damage;
+        this.hitFlash = 1;
+
+        if (this.health <= 0) {
+            this.alive = false;
+            this.dying = true;
+            this.deathTimer = 0;
+            this.deathVx = randomRange(-100, 100);
+            this.deathVy = randomRange(-250, -100);
+            this.deathRotSpeed = randomRange(-8, 8);
+            return true; // killed
+        }
+        return false; // still alive
+    }
+
+    containsPoint(px, py) {
+        if (!this.alive || this.dying) return false;
+        const hw = this.width * 0.6;
+        const hh = this.height * 0.6;
+        return px >= this.x - hw && px <= this.x + hw &&
+               py >= this.y - hh && py <= this.y + hh;
+    }
+
+    isCriticalHit(px, py) {
+        // Critical zone is the center 30% of the chicken
+        const critRadius = Math.min(this.width, this.height) * 0.2;
+        const dx = px - this.x;
+        const dy = py - this.y;
+        return (dx * dx + dy * dy) <= critRadius * critRadius;
+    }
+
+    render(ctx) {
+        if (!this.active) return;
+
+        ctx.save();
+        ctx.translate(this.x, this.y);
+
+        if (this.dying) {
+            ctx.rotate(this.deathRotation);
+            ctx.globalAlpha = Math.max(0, 1 - this.deathTimer * 0.8);
+        }
+
+        const s = this.scale;
+        const dir = this.facingLeft ? -1 : 1;
+        ctx.scale(dir, 1);
+
+        // Hit flash effect
+        if (this.hitFlash > 0) {
+            ctx.filter = `brightness(${1 + this.hitFlash * 2})`;
+        }
+
+        // Shadow under chicken
+        ctx.fillStyle = 'rgba(0,0,0,0.15)';
+        ctx.beginPath();
+        ctx.ellipse(0, this.height * 0.4 * s, this.width * 0.4 * s, 6 * s, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Body
+        ctx.fillStyle = this.type.bodyColor;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, this.width * 0.4 * s, this.height * 0.35 * s, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Body highlight
+        ctx.fillStyle = this.type.color;
+        ctx.beginPath();
+        ctx.ellipse(-2 * s, -4 * s, this.width * 0.32 * s, this.height * 0.25 * s, -0.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Wing (animated)
+        ctx.save();
+        ctx.translate(2 * s, 2 * s);
+        ctx.rotate(this.wingAngle);
+        ctx.fillStyle = this.type.wingColor;
+        ctx.beginPath();
+        ctx.ellipse(8 * s, 0, 16 * s, 8 * s, 0.3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        // Tail feathers
+        ctx.fillStyle = this.type.wingColor;
+        for (let i = 0; i < 3; i++) {
+            ctx.save();
+            ctx.translate(-this.width * 0.35 * s, -4 * s + i * 4 * s);
+            ctx.rotate(-0.5 + i * 0.25);
+            ctx.beginPath();
+            ctx.ellipse(-8 * s, 0, 12 * s, 3 * s, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // Head
+        ctx.fillStyle = this.type.color;
+        ctx.beginPath();
+        ctx.arc(this.width * 0.25 * s, -this.height * 0.2 * s, 10 * s, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Comb
+        ctx.fillStyle = this.type.combColor;
+        const combX = this.width * 0.25 * s;
+        const combY = -this.height * 0.2 * s - 10 * s;
+        for (let i = 0; i < 3; i++) {
+            ctx.beginPath();
+            ctx.arc(combX - 4 * s + i * 4 * s, combY - 2 * s + Math.abs(i - 1) * 2 * s, 3.5 * s, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Eye
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.arc(this.width * 0.32 * s, -this.height * 0.22 * s, 4 * s, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = this.type.eyeColor;
+        ctx.beginPath();
+        ctx.arc(this.width * 0.34 * s, -this.height * 0.22 * s, 2.5 * s, 0, Math.PI * 2);
+        ctx.fill();
+        // Pupil highlight
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.arc(this.width * 0.35 * s, -this.height * 0.24 * s, 1 * s, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Beak
+        ctx.fillStyle = this.type.beakColor;
+        ctx.beginPath();
+        const beakX = this.width * 0.38 * s;
+        const beakY = -this.height * 0.15 * s;
+        ctx.moveTo(beakX, beakY - 3 * s);
+        ctx.lineTo(beakX + 10 * s, beakY);
+        ctx.lineTo(beakX, beakY + 3 * s);
+        ctx.closePath();
+        ctx.fill();
+
+        // Legs
+        ctx.strokeStyle = '#FFA500';
+        ctx.lineWidth = 2 * s;
+        ctx.lineCap = 'round';
+        for (let i = -1; i <= 1; i += 2) {
+            ctx.beginPath();
+            ctx.moveTo(i * 5 * s, this.height * 0.3 * s);
+            ctx.lineTo(i * 5 * s + 2 * s, this.height * 0.5 * s);
+            // Toes
+            ctx.moveTo(i * 5 * s - 3 * s, this.height * 0.52 * s);
+            ctx.lineTo(i * 5 * s + 2 * s, this.height * 0.5 * s);
+            ctx.lineTo(i * 5 * s + 7 * s, this.height * 0.52 * s);
+            ctx.stroke();
+        }
+
+        // Health bar for armored/boss types
+        if (this.maxHealth > 1 && this.alive) {
+            const barW = this.width * 0.7 * s;
+            const barH = 4 * s;
+            const barX = -barW / 2;
+            const barY = -this.height * 0.5 * s - 10 * s;
+
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.fillRect(barX - 1, barY - 1, barW + 2, barH + 2);
+            ctx.fillStyle = '#333';
+            ctx.fillRect(barX, barY, barW, barH);
+
+            const healthPct = this.health / this.maxHealth;
+            const hColor = healthPct > 0.5 ? '#44FF44' : healthPct > 0.25 ? '#FFAA00' : '#FF3333';
+            ctx.fillStyle = hColor;
+            ctx.fillRect(barX, barY, barW * healthPct, barH);
+        }
+
+        ctx.filter = 'none';
+        ctx.restore();
+    }
+}
+
+class PowerUp {
+    constructor() {
+        this.reset();
+    }
+
+    reset() {
+        this.x = 0;
+        this.y = 0;
+        this.active = false;
+        this.type = null;
+        this.typeName = '';
+        this.size = 28;
+        this.bobOffset = 0;
+        this.glowPhase = 0;
+        this.vx = 0;
+        this.vy = 0;
+        this.lifetime = 0;
+        this.maxLifetime = 8;
+    }
+
+    spawn(x, y, typeName) {
+        this.active = true;
+        this.x = x;
+        this.y = y;
+        this.type = POWERUP_TYPES[typeName];
+        this.typeName = typeName;
+        this.vx = randomRange(-30, 30);
+        this.vy = randomRange(-60, -20);
+        this.bobOffset = Math.random() * Math.PI * 2;
+        this.glowPhase = 0;
+        this.lifetime = 0;
+    }
+
+    update(dt) {
+        if (!this.active) return;
+
+        this.lifetime += dt;
+        if (this.lifetime > this.maxLifetime) {
+            this.active = false;
+            return;
+        }
+
+        this.vy += 40 * dt;
+        this.x += this.vx * dt;
+        this.y += this.vy * dt;
+        this.vx *= 0.99;
+
+        this.glowPhase += dt * 4;
+        this.bobOffset += dt * 2;
+    }
+
+    containsPoint(px, py) {
+        if (!this.active) return false;
+        const dx = px - this.x;
+        const dy = py - this.y;
+        return (dx * dx + dy * dy) <= this.size * this.size * 1.5;
+    }
+
+    render(ctx) {
+        if (!this.active) return;
+
+        ctx.save();
+        ctx.translate(this.x, this.y + Math.sin(this.bobOffset) * 5);
+
+        // Pulsing opacity near end of life
+        const remainLife = this.maxLifetime - this.lifetime;
+        if (remainLife < 2) {
+            ctx.globalAlpha = 0.5 + Math.sin(this.lifetime * 10) * 0.5;
+        }
+
+        // Glow
+        const glowSize = this.size + Math.sin(this.glowPhase) * 5;
+        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, glowSize * 1.5);
+        gradient.addColorStop(0, this.type.color + '66');
+        gradient.addColorStop(1, this.type.color + '00');
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(0, 0, glowSize * 1.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Circle background
+        ctx.fillStyle = this.type.color;
+        ctx.shadowColor = this.type.color;
+        ctx.shadowBlur = 15;
+        ctx.beginPath();
+        ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Inner circle
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#FFFFFF33';
+        ctx.beginPath();
+        ctx.arc(0, -3, this.size * 0.7, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Icon
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = `bold ${Math.round(this.size)}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(this.type.icon, 0, 1);
+
+        ctx.restore();
+    }
+}
+
+// Entity manager
+class EntityManager {
+    constructor() {
+        this.chickens = [];
+        this.powerUps = [];
+        this.maxChickens = 30;
+        this.maxPowerUps = 5;
+
+        // Pre-allocate
+        for (let i = 0; i < this.maxChickens; i++) {
+            this.chickens.push(new Chicken());
+        }
+        for (let i = 0; i < this.maxPowerUps; i++) {
+            this.powerUps.push(new PowerUp());
+        }
+
+        this.spawnTimer = 0;
+        this.spawnInterval = 2.0;
+        this.powerUpTimer = 0;
+        this.powerUpInterval = 15;
+        this.difficulty = 1;
+        this.totalSpawned = 0;
+    }
+
+    reset() {
+        this.chickens.forEach(c => { c.active = false; c.alive = false; c.dying = false; });
+        this.powerUps.forEach(p => { p.active = false; });
+        this.spawnTimer = 0;
+        this.powerUpTimer = 0;
+        this.difficulty = 1;
+        this.totalSpawned = 0;
+        this.spawnInterval = 2.0;
+    }
+
+    selectChickenType() {
+        const types = Object.entries(CHICKEN_TYPES);
+        let totalWeight = 0;
+        const weights = types.map(([name, cfg]) => {
+            const w = cfg.spawnWeight;
+            totalWeight += w;
+            return { name, weight: totalWeight };
+        });
+        const r = Math.random() * totalWeight;
+        for (const { name, weight } of weights) {
+            if (r <= weight) return name;
+        }
+        return 'normal';
+    }
+
+    spawnChicken(canvasW, canvasH) {
+        const chicken = this.chickens.find(c => !c.active);
+        if (!chicken) return null;
+
+        const typeName = this.selectChickenType();
+        chicken.spawn(canvasW, canvasH, typeName, this.difficulty);
+        this.totalSpawned++;
+        return chicken;
+    }
+
+    spawnPowerUp(x, y) {
+        const pu = this.powerUps.find(p => !p.active);
+        if (!pu) return null;
+
+        const types = Object.keys(POWERUP_TYPES);
+        const typeName = types[randomInt(0, types.length - 1)];
+        pu.spawn(x, y, typeName);
+        return pu;
+    }
+
+    update(dt, canvasW, canvasH, timeScale = 1) {
+        // Difficulty scaling
+        this.difficulty = 1 + this.totalSpawned * 0.02;
+        this.spawnInterval = Math.max(0.4, 2.0 - this.difficulty * 0.1);
+
+        // Spawn timer
+        this.spawnTimer += dt;
+        if (this.spawnTimer >= this.spawnInterval) {
+            this.spawnTimer = 0;
+            // Spawn 1-3 chickens based on difficulty
+            const count = Math.min(3, 1 + Math.floor(this.difficulty * 0.3));
+            for (let i = 0; i < count; i++) {
+                this.spawnChicken(canvasW, canvasH);
+            }
+        }
+
+        // Power-up spawn timer
+        this.powerUpTimer += dt;
+        if (this.powerUpTimer >= this.powerUpInterval) {
+            this.powerUpTimer = 0;
+            // Spawn power-up at random position
+            this.spawnPowerUp(
+                randomRange(canvasW * 0.2, canvasW * 0.8),
+                randomRange(canvasH * 0.15, canvasH * 0.5)
+            );
+        }
+
+        // Update entities
+        for (const c of this.chickens) {
+            if (c.active) c.update(dt, timeScale);
+        }
+        for (const p of this.powerUps) {
+            if (p.active) p.update(dt);
+        }
+    }
+
+    getChickenAt(px, py) {
+        // Check in reverse order (topmost first)
+        for (let i = this.chickens.length - 1; i >= 0; i--) {
+            const c = this.chickens[i];
+            if (c.active && c.alive && c.containsPoint(px, py)) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    getPowerUpAt(px, py) {
+        for (const p of this.powerUps) {
+            if (p.active && p.containsPoint(px, py)) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    render(ctx) {
+        // Render chickens sorted by y position for depth
+        const activeChickens = this.chickens.filter(c => c.active);
+        activeChickens.sort((a, b) => a.y - b.y);
+        for (const c of activeChickens) {
+            c.render(ctx);
+        }
+        for (const p of this.powerUps) {
+            if (p.active) p.render(ctx);
+        }
+    }
+
+    getActiveCount() {
+        return this.chickens.filter(c => c.active && c.alive).length;
+    }
+}
+
+// Input Handling System
+class InputSystem {
+    constructor(canvas) {
+        this.canvas = canvas;
+        this.mouseX = 0;
+        this.mouseY = 0;
+        this.clicks = [];
+        this.keys = {};
+        this.cursorVisible = true;
+
+        this._onMouseMove = this._onMouseMove.bind(this);
+        this._onClick = this._onClick.bind(this);
+        this._onKeyDown = this._onKeyDown.bind(this);
+        this._onKeyUp = this._onKeyUp.bind(this);
+        this._onContextMenu = this._onContextMenu.bind(this);
+        this._onTouchStart = this._onTouchStart.bind(this);
+        this._onTouchMove = this._onTouchMove.bind(this);
+
+        this.canvas.addEventListener('mousemove', this._onMouseMove);
+        this.canvas.addEventListener('click', this._onClick);
+        window.addEventListener('keydown', this._onKeyDown);
+        window.addEventListener('keyup', this._onKeyUp);
+        this.canvas.addEventListener('contextmenu', this._onContextMenu);
+        this.canvas.addEventListener('touchstart', this._onTouchStart, { passive: false });
+        this.canvas.addEventListener('touchmove', this._onTouchMove, { passive: false });
+    }
+
+    _getCanvasCoords(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        return {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+        };
+    }
+
+    _getTouchCoords(e) {
+        const touch = e.touches[0] || e.changedTouches[0];
+        const rect = this.canvas.getBoundingClientRect();
+        return {
+            x: touch.clientX - rect.left,
+            y: touch.clientY - rect.top
+        };
+    }
+
+    _onMouseMove(e) {
+        const coords = this._getCanvasCoords(e);
+        this.mouseX = coords.x;
+        this.mouseY = coords.y;
+    }
+
+    _onClick(e) {
+        const coords = this._getCanvasCoords(e);
+        this.clicks.push({ x: coords.x, y: coords.y, time: performance.now() });
+    }
+
+    _onKeyDown(e) {
+        this.keys[e.code] = true;
+    }
+
+    _onKeyUp(e) {
+        this.keys[e.code] = false;
+    }
+
+    _onTouchStart(e) {
+        e.preventDefault();
+        const coords = this._getTouchCoords(e);
+        this.mouseX = coords.x;
+        this.mouseY = coords.y;
+        this.clicks.push({ x: coords.x, y: coords.y, time: performance.now() });
+    }
+
+    _onTouchMove(e) {
+        e.preventDefault();
+        const coords = this._getTouchCoords(e);
+        this.mouseX = coords.x;
+        this.mouseY = coords.y;
+    }
+
+    _onContextMenu(e) {
+        e.preventDefault();
+    }
+
+    getClicks() {
+        const clicks = this.clicks.slice();
+        this.clicks.length = 0;
+        return clicks;
+    }
+
+    isKeyPressed(code) {
+        return !!this.keys[code];
+    }
+
+    consumeKey(code) {
+        if (this.keys[code]) {
+            this.keys[code] = false;
+            return true;
+        }
+        return false;
+    }
+
+    setCrosshairCursor() {
+        this.canvas.style.cursor = 'crosshair';
+    }
+
+    setDefaultCursor() {
+        this.canvas.style.cursor = 'default';
+    }
+
+    hideCursor() {
+        this.canvas.style.cursor = 'none';
+        this.cursorVisible = false;
+    }
+
+    showCursor() {
+        this.canvas.style.cursor = 'crosshair';
+        this.cursorVisible = true;
+    }
+
+    // Render custom crosshair
+    renderCrosshair(ctx) {
+        const x = this.mouseX;
+        const y = this.mouseY;
+        const size = 18;
+
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.strokeStyle = '#FF3333';
+        ctx.lineWidth = 2;
+        ctx.shadowColor = '#FF0000';
+        ctx.shadowBlur = 8;
+
+        // Outer circle
+        ctx.beginPath();
+        ctx.arc(0, 0, size, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Cross lines
+        ctx.beginPath();
+        ctx.moveTo(0, -size - 6);
+        ctx.lineTo(0, -size * 0.4);
+        ctx.moveTo(0, size * 0.4);
+        ctx.lineTo(0, size + 6);
+        ctx.moveTo(-size - 6, 0);
+        ctx.lineTo(-size * 0.4, 0);
+        ctx.moveTo(size * 0.4, 0);
+        ctx.lineTo(size + 6, 0);
+        ctx.stroke();
+
+        // Center dot
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#FF3333';
+        ctx.beginPath();
+        ctx.arc(0, 0, 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    destroy() {
+        this.canvas.removeEventListener('mousemove', this._onMouseMove);
+        this.canvas.removeEventListener('click', this._onClick);
+        window.removeEventListener('keydown', this._onKeyDown);
+        window.removeEventListener('keyup', this._onKeyUp);
+        this.canvas.removeEventListener('contextmenu', this._onContextMenu);
+        this.canvas.removeEventListener('touchstart', this._onTouchStart);
+        this.canvas.removeEventListener('touchmove', this._onTouchMove);
+    }
+}
+
+// Renderer - Handles canvas rendering, background, and parallax
+
+
+class Renderer {
+    constructor(canvas) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+
+        // Background layers for parallax
+        this.bgLayers = [];
+        this.clouds = [];
+        this.trees = [];
+        this.grassBlades = [];
+        this.mountains = [];
+
+        this.timeOfDay = 0; // 0-1, affects sky color
+        this.screenShake = { x: 0, y: 0, intensity: 0, decay: 0.9 };
+
+        this.resize();
+        this._generateBackground();
+    }
+
+    resize() {
+        const container = this.canvas.parentElement;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        this.canvas.width = w * dpr;
+        this.canvas.height = h * dpr;
+        this.canvas.style.width = w + 'px';
+        this.canvas.style.height = h + 'px';
+        this.ctx.scale(dpr, dpr);
+        this.displayWidth = w;
+        this.displayHeight = h;
+        this._generateBackground();
+    }
+
+    _generateBackground() {
+        const w = this.displayWidth;
+        const h = this.displayHeight;
+
+        // Generate mountains
+        this.mountains = [];
+        for (let layer = 0; layer < 3; layer++) {
+            const points = [];
+            const segments = 20 + layer * 5;
+            const baseY = h * (0.55 + layer * 0.1);
+            const amplitude = h * (0.15 - layer * 0.03);
+
+            for (let i = 0; i <= segments; i++) {
+                const x = (i / segments) * (w + 100) - 50;
+                const y = baseY - Math.abs(Math.sin(i * 0.8 + layer * 2)) * amplitude
+                    - Math.abs(Math.sin(i * 1.7 + layer)) * amplitude * 0.5;
+                points.push({ x, y });
+            }
+            this.mountains.push({
+                points,
+                layer,
+                parallax: 0.1 + layer * 0.05,
+                color: layer === 0 ? '#2d4a3e' : layer === 1 ? '#3d6b55' : '#4a8a6a'
+            });
+        }
+
+        // Generate clouds
+        this.clouds = [];
+        for (let i = 0; i < 8; i++) {
+            this.clouds.push({
+                x: randomRange(-100, w + 100),
+                y: randomRange(h * 0.03, h * 0.3),
+                width: randomRange(80, 250),
+                height: randomRange(30, 70),
+                speed: randomRange(5, 25),
+                opacity: randomRange(0.3, 0.7),
+                parallax: randomRange(0.02, 0.08)
+            });
+        }
+
+        // Generate trees
+        this.trees = [];
+        for (let i = 0; i < 15; i++) {
+            this.trees.push({
+                x: randomRange(0, w),
+                baseY: h * randomRange(0.7, 0.82),
+                height: randomRange(40, 120),
+                width: randomRange(20, 50),
+                type: Math.random() > 0.5 ? 'pine' : 'deciduous',
+                color: `hsl(${randomRange(90, 150)}, ${randomRange(30, 60)}%, ${randomRange(20, 40)}%)`,
+                parallax: randomRange(0.1, 0.2)
+            });
+        }
+
+        // Generate grass
+        this.grassBlades = [];
+        for (let i = 0; i < 100; i++) {
+            this.grassBlades.push({
+                x: randomRange(0, w),
+                baseY: h * randomRange(0.82, 0.95),
+                height: randomRange(10, 30),
+                swayOffset: randomRange(0, Math.PI * 2),
+                swaySpeed: randomRange(1.5, 3),
+                color: `hsl(${randomRange(80, 140)}, ${randomRange(40, 70)}%, ${randomRange(25, 45)}%)`
+            });
+        }
+    }
+
+    shake(intensity = 5) {
+        this.screenShake.intensity = intensity;
+    }
+
+    clear() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+
+    beginFrame() {
+        const ctx = this.ctx;
+        ctx.save();
+        if (this.screenShake.intensity > 0.1) {
+            this.screenShake.x = (Math.random() - 0.5) * this.screenShake.intensity * 2;
+            this.screenShake.y = (Math.random() - 0.5) * this.screenShake.intensity * 2;
+            this.screenShake.intensity *= this.screenShake.decay;
+            ctx.translate(this.screenShake.x, this.screenShake.y);
+        }
+    }
+
+    endFrame() {
+        this.ctx.restore();
+    }
+
+    renderBackground(time) {
+        const ctx = this.ctx;
+        const w = this.displayWidth;
+        const h = this.displayHeight;
+
+        // Sky gradient
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, h * 0.7);
+        skyGrad.addColorStop(0, '#1a3a5c');
+        skyGrad.addColorStop(0.3, '#3a7bd5');
+        skyGrad.addColorStop(0.6, '#6db3f2');
+        skyGrad.addColorStop(1, '#b8ddf7');
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, w, h);
+
+        // Sun
+        const sunX = w * 0.8;
+        const sunY = h * 0.12;
+        const sunGrad = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, 120);
+        sunGrad.addColorStop(0, 'rgba(255, 250, 200, 0.9)');
+        sunGrad.addColorStop(0.3, 'rgba(255, 220, 100, 0.4)');
+        sunGrad.addColorStop(1, 'rgba(255, 200, 50, 0)');
+        ctx.fillStyle = sunGrad;
+        ctx.fillRect(sunX - 120, sunY - 120, 240, 240);
+
+        ctx.fillStyle = '#FFFDE8';
+        ctx.beginPath();
+        ctx.arc(sunX, sunY, 25, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Clouds
+        for (const cloud of this.clouds) {
+            cloud.x += cloud.speed * 0.016;
+            if (cloud.x > w + cloud.width) cloud.x = -cloud.width;
+
+            ctx.save();
+            ctx.globalAlpha = cloud.opacity;
+            ctx.fillStyle = '#FFFFFF';
+            const cx = cloud.x;
+            const cy = cloud.y;
+
+            // Multi-ellipse cloud
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, cloud.width * 0.5, cloud.height * 0.4, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(cx - cloud.width * 0.25, cy + 5, cloud.width * 0.35, cloud.height * 0.35, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(cx + cloud.width * 0.25, cy + 3, cloud.width * 0.35, cloud.height * 0.3, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(cx + cloud.width * 0.1, cy - cloud.height * 0.2, cloud.width * 0.3, cloud.height * 0.35, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        // Mountains
+        for (const mtn of this.mountains) {
+            ctx.fillStyle = mtn.color;
+            ctx.beginPath();
+            ctx.moveTo(-50, h);
+            for (const pt of mtn.points) {
+                ctx.lineTo(pt.x, pt.y);
+            }
+            ctx.lineTo(w + 50, h);
+            ctx.closePath();
+            ctx.fill();
+
+            // Atmospheric haze
+            if (mtn.layer < 2) {
+                ctx.fillStyle = `rgba(100, 160, 200, ${0.15 - mtn.layer * 0.05})`;
+                ctx.fill();
+            }
+        }
+
+        // Ground
+        const groundY = h * 0.78;
+        const groundGrad = ctx.createLinearGradient(0, groundY, 0, h);
+        groundGrad.addColorStop(0, '#4a7c3f');
+        groundGrad.addColorStop(0.3, '#3d6b33');
+        groundGrad.addColorStop(1, '#2d5023');
+        ctx.fillStyle = groundGrad;
+        ctx.fillRect(0, groundY, w, h - groundY);
+
+        // Ground detail line
+        ctx.strokeStyle = '#5a9c4f';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let x = 0; x < w; x += 3) {
+            const y = groundY + Math.sin(x * 0.05) * 3 + Math.sin(x * 0.02) * 5;
+            if (x === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // Trees (background)
+        for (const tree of this.trees) {
+            this._renderTree(ctx, tree, time);
+        }
+
+        // Grass
+        for (const grass of this.grassBlades) {
+            const sway = Math.sin(time * 0.001 * grass.swaySpeed + grass.swayOffset) * 5;
+            ctx.strokeStyle = grass.color;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(grass.x, grass.baseY);
+            ctx.quadraticCurveTo(
+                grass.x + sway,
+                grass.baseY - grass.height * 0.6,
+                grass.x + sway * 1.5,
+                grass.baseY - grass.height
+            );
+            ctx.stroke();
+        }
+    }
+
+    _renderTree(ctx, tree, time) {
+        const sway = Math.sin(time * 0.001 + tree.x * 0.01) * 2;
+
+        ctx.save();
+        ctx.translate(tree.x, tree.baseY);
+
+        // Trunk
+        ctx.fillStyle = '#5D3A1A';
+        ctx.fillRect(-tree.width * 0.1, -tree.height * 0.4, tree.width * 0.2, tree.height * 0.4);
+
+        if (tree.type === 'pine') {
+            // Pine tree layers
+            for (let i = 0; i < 3; i++) {
+                const layerW = tree.width * (1 - i * 0.25);
+                const layerY = -tree.height * (0.3 + i * 0.25);
+                const layerH = tree.height * 0.35;
+
+                ctx.fillStyle = tree.color;
+                ctx.beginPath();
+                ctx.moveTo(sway, layerY - layerH);
+                ctx.lineTo(-layerW / 2, layerY);
+                ctx.lineTo(layerW / 2, layerY);
+                ctx.closePath();
+                ctx.fill();
+            }
+        } else {
+            // Deciduous tree crown
+            ctx.fillStyle = tree.color;
+            ctx.beginPath();
+            ctx.ellipse(sway, -tree.height * 0.65, tree.width * 0.5, tree.height * 0.4, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Highlight
+            ctx.fillStyle = 'rgba(255,255,255,0.1)';
+            ctx.beginPath();
+            ctx.ellipse(sway - 5, -tree.height * 0.7, tree.width * 0.3, tree.height * 0.25, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        ctx.restore();
+    }
+
+    renderForeground(time) {
+        // Vignette effect
+        const ctx = this.ctx;
+        const w = this.displayWidth;
+        const h = this.displayHeight;
+
+        const vignetteGrad = ctx.createRadialGradient(w / 2, h / 2, w * 0.3, w / 2, h / 2, w * 0.8);
+        vignetteGrad.addColorStop(0, 'rgba(0,0,0,0)');
+        vignetteGrad.addColorStop(1, 'rgba(0,0,0,0.3)');
+        ctx.fillStyle = vignetteGrad;
+        ctx.fillRect(0, 0, w, h);
+    }
+
+    get width() { return this.displayWidth; }
+    get height() { return this.displayHeight; }
+}
+
+// UI System - Menus, HUD, and transitions
+class UISystem {
+    constructor() {
+        // Screens
+        this.mainMenu = document.getElementById('main-menu');
+        this.howToScreen = document.getElementById('how-to-screen');
+        this.pauseScreen = document.getElementById('pause-screen');
+        this.gameoverScreen = document.getElementById('gameover-screen');
+        this.hud = document.getElementById('hud');
+
+        // HUD elements
+        this.hudScore = document.getElementById('hud-score');
+        this.hudCombo = document.getElementById('hud-combo');
+        this.hudTime = document.getElementById('hud-time');
+        this.hudAccuracy = document.getElementById('hud-accuracy');
+        this.comboBar = document.getElementById('combo-bar');
+        this.powerUpIndicator = document.getElementById('power-up-indicator');
+        this.powerUpName = document.getElementById('power-up-name');
+        this.powerUpTimer = document.getElementById('power-up-timer');
+
+        // Game over elements
+        this.finalScore = document.getElementById('final-score');
+        this.finalAccuracy = document.getElementById('final-accuracy');
+        this.finalCombo = document.getElementById('final-combo');
+        this.finalHits = document.getElementById('final-hits');
+        this.finalHighScore = document.getElementById('final-high-score');
+
+        // High score display
+        this.highScoreValue = document.getElementById('high-score-value');
+
+        // Animation state
+        this.scoreDisplayed = 0;
+        this.targetScore = 0;
+        this.comboScale = 1;
+    }
+
+    showScreen(screen) {
+        [this.mainMenu, this.howToScreen, this.pauseScreen, this.gameoverScreen].forEach(s => {
+            s.classList.remove('active');
+        });
+        if (screen) {
+            screen.classList.add('active');
+        }
+    }
+
+    showMainMenu() {
+        this.showScreen(this.mainMenu);
+        this.hud.classList.add('hidden');
+        this.highScoreValue.textContent = this.getHighScore().toLocaleString();
+    }
+
+    showHowTo() {
+        this.showScreen(this.howToScreen);
+    }
+
+    showPause() {
+        this.showScreen(this.pauseScreen);
+    }
+
+    showGameOver(stats) {
+        this.showScreen(this.gameoverScreen);
+
+        // Animate final stats appearance
+        this.finalScore.textContent = stats.score.toLocaleString();
+        this.finalAccuracy.textContent = stats.accuracy + '%';
+        this.finalCombo.textContent = stats.maxCombo + 'x';
+        this.finalHits.textContent = stats.hits;
+
+        const highScore = this.getHighScore();
+        if (stats.score > highScore) {
+            this.setHighScore(stats.score);
+            this.finalHighScore.textContent = stats.score.toLocaleString() + ' NEW!';
+            this.finalHighScore.style.color = '#FFD700';
+        } else {
+            this.finalHighScore.textContent = highScore.toLocaleString();
+            this.finalHighScore.style.color = '';
+        }
+    }
+
+    showGameplay() {
+        this.showScreen(null);
+        this.hud.classList.remove('hidden');
+    }
+
+    hidePause() {
+        this.pauseScreen.classList.remove('active');
+    }
+
+    updateHUD(state) {
+        // Smooth score counting
+        this.targetScore = state.score;
+        if (this.scoreDisplayed < this.targetScore) {
+            this.scoreDisplayed += Math.ceil((this.targetScore - this.scoreDisplayed) * 0.15);
+            if (this.scoreDisplayed > this.targetScore) this.scoreDisplayed = this.targetScore;
+        }
+        this.hudScore.textContent = this.scoreDisplayed.toLocaleString();
+
+        // Combo display
+        if (state.combo > 1) {
+            this.hudCombo.textContent = state.combo + 'x';
+            this.hudCombo.style.color = state.combo >= 10 ? '#FF4444' :
+                                         state.combo >= 5 ? '#FFD700' : '#FFFFFF';
+            if (state.comboChanged) {
+                this.hudCombo.style.transform = 'scale(1.4)';
+                setTimeout(() => { this.hudCombo.style.transform = 'scale(1)'; }, 150);
+            }
+        } else {
+            this.hudCombo.textContent = '1x';
+            this.hudCombo.style.color = '#888';
+        }
+
+        // Time
+        if (state.timeLimit > 0) {
+            const secs = Math.ceil(state.timeRemaining);
+            this.hudTime.textContent = secs;
+            this.hudTime.style.color = secs <= 10 ? '#FF4444' : '#FFFFFF';
+            if (secs <= 5) {
+                this.hudTime.style.animation = 'pulse 0.5s ease-in-out infinite';
+            } else {
+                this.hudTime.style.animation = '';
+            }
+        } else {
+            // Endless mode: show elapsed time
+            const elapsed = Math.floor(state.elapsedTime || 0);
+            const mins = Math.floor(elapsed / 60);
+            const secs = elapsed % 60;
+            this.hudTime.textContent = mins + ':' + String(secs).padStart(2, '0');
+            this.hudTime.style.color = '#44AAFF';
+            this.hudTime.style.animation = '';
+        }
+
+        // Accuracy
+        this.hudAccuracy.textContent = state.accuracy + '%';
+        this.hudAccuracy.style.color = state.accuracy >= 80 ? '#44FF44' :
+                                        state.accuracy >= 50 ? '#FFDD44' : '#FF4444';
+
+        // Combo bar
+        this.comboBar.style.width = (state.comboTimer / state.comboMaxTime * 100) + '%';
+        this.comboBar.style.backgroundColor = state.combo >= 10 ? '#FF4444' :
+                                               state.combo >= 5 ? '#FFD700' : '#44AAFF';
+
+        // Power-up indicator
+        if (state.activePowerUp) {
+            this.powerUpIndicator.classList.remove('hidden');
+            this.powerUpName.textContent = state.activePowerUp.name;
+            this.powerUpName.style.color = state.activePowerUp.color;
+            this.powerUpTimer.style.width = (state.powerUpRemaining / state.powerUpDuration * 100) + '%';
+            this.powerUpTimer.style.backgroundColor = state.activePowerUp.color;
+        } else {
+            this.powerUpIndicator.classList.add('hidden');
+        }
+    }
+
+    getHighScore() {
+        try {
+            return parseInt(localStorage.getItem('skyhunter_highscore') || '0', 10);
+        } catch {
+            return 0;
+        }
+    }
+
+    setHighScore(score) {
+        try {
+            localStorage.setItem('skyhunter_highscore', score.toString());
+        } catch { /* ignore */ }
+    }
+
+    resetScoreDisplay() {
+        this.scoreDisplayed = 0;
+        this.targetScore = 0;
+    }
+}
+
+// Game - Main game loop and state management
+
+
+
+
+
+
+
+
+const GAME_STATES = {
+    MENU: 'menu',
+    PLAYING: 'playing',
+    PAUSED: 'paused',
+    GAME_OVER: 'gameover',
+    HOW_TO: 'howto'
+};
+
+const TIMED_DURATION = 60; // seconds
+const COMBO_TIMEOUT = 2.5; // seconds to maintain combo
+const MISS_PENALTY = -25;
+
+class Game {
+    constructor() {
+        this.canvas = document.getElementById('game-canvas');
+        this.renderer = new Renderer(this.canvas);
+        this.input = new InputSystem(this.canvas);
+        this.entities = new EntityManager();
+        this.particles = new ParticleSystem();
+        this.audio = new AudioSystem();
+        this.ui = new UISystem();
+
+        this.state = GAME_STATES.MENU;
+        this.gameMode = 'timed'; // 'timed' or 'endless'
+        this.lastTime = 0;
+        this.running = false;
+
+        // Game stats
+        this.stats = {
+            score: 0,
+            combo: 1,
+            maxCombo: 1,
+            comboTimer: 0,
+            comboMaxTime: COMBO_TIMEOUT,
+            comboChanged: false,
+            hits: 0,
+            shots: 0,
+            misses: 0,
+            accuracy: 100,
+            timeRemaining: TIMED_DURATION,
+            timeLimit: TIMED_DURATION,
+            elapsedTime: 0,
+            activePowerUp: null,
+            powerUpRemaining: 0,
+            powerUpDuration: 0
+        };
+
+        // Power-up state
+        this.activePowerUp = null;
+        this.powerUpTimer = 0;
+        this.timeScale = 1;
+
+        // Muzzle flash
+        this.muzzleFlash = 0;
+
+        this._bindUI();
+        this._bindResize();
+    }
+
+    _bindUI() {
+        document.getElementById('btn-timed').addEventListener('click', () => {
+            this.startGame('timed');
+        });
+        document.getElementById('btn-endless').addEventListener('click', () => {
+            this.startGame('endless');
+        });
+        document.getElementById('btn-how-to').addEventListener('click', () => {
+            this.state = GAME_STATES.HOW_TO;
+            this.ui.showHowTo();
+        });
+        document.getElementById('btn-back-menu').addEventListener('click', () => {
+            this.state = GAME_STATES.MENU;
+            this.ui.showMainMenu();
+        });
+        document.getElementById('btn-pause').addEventListener('click', () => {
+            this.pause();
+        });
+        document.getElementById('btn-resume').addEventListener('click', () => {
+            this.resume();
+        });
+        document.getElementById('btn-quit').addEventListener('click', () => {
+            this.quitToMenu();
+        });
+        document.getElementById('btn-retry').addEventListener('click', () => {
+            this.startGame(this.gameMode);
+        });
+        document.getElementById('btn-menu').addEventListener('click', () => {
+            this.quitToMenu();
+        });
+    }
+
+    _bindResize() {
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                this.renderer.resize();
+            }, 100);
+        });
+    }
+
+    start() {
+        this.running = true;
+        this.ui.showMainMenu();
+        this.input.setDefaultCursor();
+        this.lastTime = performance.now();
+        this._loop(this.lastTime);
+    }
+
+    startGame(mode) {
+        this.audio.init();
+        this.audio.resume();
+
+        this.gameMode = mode;
+        this.state = GAME_STATES.PLAYING;
+
+        // Reset stats
+        this.stats.score = 0;
+        this.stats.combo = 1;
+        this.stats.maxCombo = 1;
+        this.stats.comboTimer = 0;
+        this.stats.comboChanged = false;
+        this.stats.hits = 0;
+        this.stats.shots = 0;
+        this.stats.misses = 0;
+        this.stats.accuracy = 100;
+        this.stats.timeRemaining = mode === 'timed' ? TIMED_DURATION : 0;
+        this.stats.timeLimit = mode === 'timed' ? TIMED_DURATION : 0;
+        this.stats.elapsedTime = 0;
+        this.stats.activePowerUp = null;
+        this.stats.powerUpRemaining = 0;
+        this.stats.powerUpDuration = 0;
+
+        this.activePowerUp = null;
+        this.powerUpTimer = 0;
+        this.timeScale = 1;
+        this.muzzleFlash = 0;
+
+        this.entities.reset();
+        this.particles.clear();
+        this.ui.resetScoreDisplay();
+        this.ui.showGameplay();
+        this.input.hideCursor();
+
+        this.audio.startMusic();
+    }
+
+    pause() {
+        if (this.state !== GAME_STATES.PLAYING) return;
+        this.state = GAME_STATES.PAUSED;
+        this.ui.showPause();
+        this.input.showCursor();
+    }
+
+    resume() {
+        if (this.state !== GAME_STATES.PAUSED) return;
+        this.state = GAME_STATES.PLAYING;
+        this.ui.hidePause();
+        this.input.hideCursor();
+        this.lastTime = performance.now();
+    }
+
+    gameOver() {
+        this.state = GAME_STATES.GAME_OVER;
+        this.audio.stopMusic();
+        this.audio.playGameOver();
+        this.input.showCursor();
+
+        this.ui.showGameOver({
+            score: this.stats.score,
+            accuracy: this.stats.accuracy,
+            maxCombo: this.stats.maxCombo,
+            hits: this.stats.hits
+        });
+    }
+
+    quitToMenu() {
+        this.state = GAME_STATES.MENU;
+        this.audio.stopMusic();
+        this.entities.reset();
+        this.particles.clear();
+        this.ui.showMainMenu();
+        this.input.setDefaultCursor();
+    }
+
+    _loop(timestamp) {
+        if (!this.running) return;
+
+        const rawDt = (timestamp - this.lastTime) / 1000;
+        const dt = Math.min(rawDt, 0.05); // Cap delta to avoid spiral
+        this.lastTime = timestamp;
+
+        this._update(dt);
+        this._render(timestamp);
+
+        requestAnimationFrame(t => this._loop(t));
+    }
+
+    _update(dt) {
+        // Handle escape key for pause
+        if (this.input.consumeKey('Escape')) {
+            if (this.state === GAME_STATES.PLAYING) this.pause();
+            else if (this.state === GAME_STATES.PAUSED) this.resume();
+        }
+
+        if (this.state !== GAME_STATES.PLAYING) return;
+
+        const effectiveDt = dt * this.timeScale;
+
+        // Track elapsed time
+        this.stats.elapsedTime += dt;
+
+        // Timer (timed mode)
+        if (this.stats.timeLimit > 0) {
+            this.stats.timeRemaining -= dt;
+            if (this.stats.timeRemaining <= 0) {
+                this.stats.timeRemaining = 0;
+                this.gameOver();
+                return;
+            }
+        }
+
+        // Endless mode: game over if accuracy drops below 20% (after at least 10 shots)
+        if (this.gameMode === 'endless' && this.stats.shots >= 10 && this.stats.accuracy < 20) {
+            this.gameOver();
+            return;
+        }
+
+        // Combo timer
+        if (this.stats.combo > 1) {
+            this.stats.comboTimer -= dt;
+            if (this.stats.comboTimer <= 0) {
+                this.stats.combo = 1;
+                this.stats.comboTimer = 0;
+            }
+        }
+
+        // Power-up timer
+        if (this.activePowerUp) {
+            this.powerUpTimer -= dt;
+            this.stats.powerUpRemaining = this.powerUpTimer;
+            if (this.powerUpTimer <= 0) {
+                this._deactivatePowerUp();
+            }
+        }
+
+        // Muzzle flash decay
+        if (this.muzzleFlash > 0) {
+            this.muzzleFlash -= dt * 10;
+        }
+
+        // Process clicks
+        const clicks = this.input.getClicks();
+        for (const click of clicks) {
+            this._processShot(click.x, click.y);
+        }
+
+        // Update entities (pass raw dt; EntityManager passes timeScale to chickens internally)
+        this.entities.update(dt, this.renderer.width, this.renderer.height, this.timeScale);
+
+        // Magnet power-up: pull chickens toward screen center
+        if (this.activePowerUp && this.activePowerUp.effect === 'magnet') {
+            const cx = this.renderer.width / 2;
+            const cy = this.renderer.height * 0.4;
+            for (const c of this.entities.chickens) {
+                if (!c.active || !c.alive || c.dying) continue;
+                c.x += (cx - c.x) * 2.0 * dt;
+                c.y += (cy - c.y) * 2.0 * dt;
+            }
+        }
+
+        // Update particles (use timeScale so particles slow during slow-mo)
+        this.particles.update(dt * this.timeScale);
+
+        // Update HUD
+        this.stats.comboChanged = false;
+        this.ui.updateHUD(this.stats);
+    }
+
+    _processShot(x, y) {
+        this.stats.shots++;
+        this.audio.playShoot();
+        this.muzzleFlash = 1;
+        this.renderer.shake(3);
+
+        // Check power-up pickup first
+        const powerUp = this.entities.getPowerUpAt(x, y);
+        if (powerUp) {
+            this._collectPowerUp(powerUp);
+            // Don't count as miss
+            this.stats.shots--;
+        }
+
+        // Check chicken hit
+        let hitSomething = false;
+        const multishot = this.activePowerUp && this.activePowerUp.effect === 'multishot';
+
+        // In multishot mode, check all chickens near the click in a larger radius
+        if (multishot) {
+            const radius = 80;
+            for (const chicken of this.entities.chickens) {
+                if (!chicken.active || !chicken.alive) continue;
+                const dx = chicken.x - x;
+                const dy = chicken.y - y;
+                const hitDist = radius + chicken.width * 0.6;
+                if (dx * dx + dy * dy <= hitDist * hitDist) {
+                    this._hitChicken(chicken, x, y);
+                    hitSomething = true;
+                }
+            }
+        } else {
+            const chicken = this.entities.getChickenAt(x, y);
+            if (chicken) {
+                this._hitChicken(chicken, x, y);
+                hitSomething = true;
+            }
+        }
+
+        if (!hitSomething && !powerUp) {
+            // Miss
+            this.stats.misses++;
+            this.stats.combo = 1;
+            this.stats.comboTimer = 0;
+            this.stats.score = Math.max(0, this.stats.score + MISS_PENALTY);
+            this.audio.playMiss();
+            this.particles.emitMiss(x, y);
+        }
+
+        // Update accuracy
+        if (this.stats.shots > 0) {
+            this.stats.accuracy = Math.round((this.stats.hits / this.stats.shots) * 100);
+        }
+    }
+
+    _hitChicken(chicken, clickX, clickY) {
+        const isCritical = chicken.isCriticalHit(clickX, clickY);
+        const damage = isCritical ? 2 : 1;
+        const killed = chicken.hit(damage);
+
+        this.stats.hits++;
+
+        // Score calculation
+        let points = chicken.type.points;
+
+        if (isCritical) {
+            points *= 2;
+            this.audio.playCriticalHit();
+            this.particles.emitCritical(chicken.x, chicken.y);
+            this.renderer.shake(6);
+        } else {
+            this.audio.playHit();
+            this.particles.emitHit(chicken.x, chicken.y, chicken.type.color);
+            this.renderer.shake(3);
+        }
+
+        // Score boost power-up
+        if (this.activePowerUp && this.activePowerUp.effect === 'scoreboost') {
+            points *= 2;
+        }
+
+        // Combo
+        this.stats.combo++;
+        this.stats.comboTimer = COMBO_TIMEOUT;
+        this.stats.comboChanged = true;
+        if (this.stats.combo > this.stats.maxCombo) {
+            this.stats.maxCombo = this.stats.combo;
+        }
+
+        // Combo milestone sounds
+        if (this.stats.combo % 5 === 0) {
+            this.audio.playComboUp();
+        }
+
+        // Apply combo multiplier
+        const comboMultiplier = Math.min(this.stats.combo, 20);
+        points *= comboMultiplier;
+
+        this.stats.score += Math.round(points);
+
+        // Score popup
+        const label = isCritical ? `CRITICAL! +${Math.round(points)}` : `+${Math.round(points)}`;
+        const popupColor = isCritical ? '#FF4444' : chicken.typeName === 'golden' ? '#FFD700' : '#FFFFFF';
+        this.particles.emitScorePopup(chicken.x, chicken.y - 30, label, popupColor);
+
+        if (this.stats.combo > 1) {
+            this.particles.emitScorePopup(chicken.x, chicken.y - 55, `${this.stats.combo}x COMBO`, '#44AAFF');
+        }
+
+        if (killed) {
+            this.particles.emitFeathers(chicken.x, chicken.y, chicken.type.color);
+
+            // Chance to spawn power-up on kill
+            if (Math.random() < 0.08) {
+                this.entities.spawnPowerUp(chicken.x, chicken.y);
+            }
+        }
+    }
+
+    _collectPowerUp(powerUp) {
+        const type = powerUp.type;
+        powerUp.active = false;
+
+        this.audio.playPowerUp();
+
+        // Deactivate existing power-up
+        if (this.activePowerUp) {
+            this._deactivatePowerUp();
+        }
+
+        this.activePowerUp = type;
+        this.powerUpTimer = type.duration;
+        this.stats.activePowerUp = type;
+        this.stats.powerUpDuration = type.duration;
+        this.stats.powerUpRemaining = type.duration;
+
+        // Apply effect
+        switch (type.effect) {
+            case 'slowmo':
+                this.timeScale = 0.4;
+                break;
+            case 'multishot':
+                // Handled in shot processing
+                break;
+            case 'scoreboost':
+                // Handled in score calculation
+                break;
+            case 'magnet':
+                // Pull nearby chickens toward center
+                break;
+        }
+
+        this.particles.emitScorePopup(
+            this.renderer.width / 2,
+            this.renderer.height * 0.3,
+            type.name + '!',
+            type.color
+        );
+    }
+
+    _deactivatePowerUp() {
+        if (!this.activePowerUp) return;
+
+        if (this.activePowerUp.effect === 'slowmo') {
+            this.timeScale = 1;
+        }
+
+        this.activePowerUp = null;
+        this.powerUpTimer = 0;
+        this.stats.activePowerUp = null;
+    }
+
+    _render(timestamp) {
+        const ctx = this.renderer.ctx;
+
+        this.renderer.clear();
+        this.renderer.beginFrame();
+        this.renderer.renderBackground(timestamp);
+
+        if (this.state === GAME_STATES.PLAYING || this.state === GAME_STATES.PAUSED) {
+            // Render entities
+            this.entities.render(ctx);
+
+            // Render particles
+            this.particles.render(ctx);
+
+            // Muzzle flash screen overlay
+            if (this.muzzleFlash > 0) {
+                ctx.save();
+                ctx.globalAlpha = this.muzzleFlash * 0.08;
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, this.renderer.width, this.renderer.height);
+                ctx.restore();
+            }
+
+            // Slow-mo visual effect
+            if (this.activePowerUp && this.activePowerUp.effect === 'slowmo') {
+                ctx.save();
+                ctx.globalAlpha = 0.1;
+                ctx.fillStyle = '#0044AA';
+                ctx.fillRect(0, 0, this.renderer.width, this.renderer.height);
+                ctx.restore();
+            }
+
+            // Magnet visual effect
+            if (this.activePowerUp && this.activePowerUp.effect === 'magnet') {
+                ctx.save();
+                ctx.globalAlpha = 0.08;
+                ctx.fillStyle = '#FF69B4';
+                ctx.fillRect(0, 0, this.renderer.width, this.renderer.height);
+                // Pulsing ring at center
+                const pulse = Math.sin(timestamp * 0.005) * 0.3 + 0.5;
+                ctx.globalAlpha = pulse * 0.2;
+                ctx.strokeStyle = '#FF69B4';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(this.renderer.width / 2, this.renderer.height * 0.4, 80 + pulse * 40, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+
+        this.renderer.renderForeground(timestamp);
+        this.renderer.endFrame();
+
+        // Custom crosshair (during gameplay, drawn outside shake transform)
+        if (this.state === GAME_STATES.PLAYING) {
+            this.input.renderCrosshair(ctx);
+        }
+    }
+}
+
+// Main entry point
+
+
+window.addEventListener('DOMContentLoaded', () => {
+    const game = new Game();
+    game.start();
+});
+</script>
+</body>
+</html>
