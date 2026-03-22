@@ -120,8 +120,13 @@ export class UISystem {
                 this.hudTime.style.animation = '';
             }
         } else {
-            this.hudTime.textContent = '--';
-            this.hudTime.style.color = '#888';
+            // Endless mode: show elapsed time
+            const elapsed = Math.floor(state.elapsedTime || 0);
+            const mins = Math.floor(elapsed / 60);
+            const secs = elapsed % 60;
+            this.hudTime.textContent = mins + ':' + String(secs).padStart(2, '0');
+            this.hudTime.style.color = '#44AAFF';
+            this.hudTime.style.animation = '';
         }
 
         // Accuracy

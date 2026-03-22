@@ -111,12 +111,8 @@ export class Renderer {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
-    renderBackground(time) {
+    beginFrame() {
         const ctx = this.ctx;
-        const w = this.displayWidth;
-        const h = this.displayHeight;
-
-        // Apply screen shake
         ctx.save();
         if (this.screenShake.intensity > 0.1) {
             this.screenShake.x = (Math.random() - 0.5) * this.screenShake.intensity * 2;
@@ -124,6 +120,16 @@ export class Renderer {
             this.screenShake.intensity *= this.screenShake.decay;
             ctx.translate(this.screenShake.x, this.screenShake.y);
         }
+    }
+
+    endFrame() {
+        this.ctx.restore();
+    }
+
+    renderBackground(time) {
+        const ctx = this.ctx;
+        const w = this.displayWidth;
+        const h = this.displayHeight;
 
         // Sky gradient
         const skyGrad = ctx.createLinearGradient(0, 0, 0, h * 0.7);
@@ -291,8 +297,6 @@ export class Renderer {
         vignetteGrad.addColorStop(1, 'rgba(0,0,0,0.3)');
         ctx.fillStyle = vignetteGrad;
         ctx.fillRect(0, 0, w, h);
-
-        ctx.restore(); // Restore from screen shake
     }
 
     get width() { return this.displayWidth; }

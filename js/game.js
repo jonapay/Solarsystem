@@ -48,6 +48,7 @@ export class Game {
             accuracy: 100,
             timeRemaining: TIMED_DURATION,
             timeLimit: TIMED_DURATION,
+            elapsedTime: 0,
             activePowerUp: null,
             powerUpRemaining: 0,
             powerUpDuration: 0
@@ -134,6 +135,7 @@ export class Game {
         this.stats.accuracy = 100;
         this.stats.timeRemaining = mode === 'timed' ? TIMED_DURATION : 0;
         this.stats.timeLimit = mode === 'timed' ? TIMED_DURATION : 0;
+        this.stats.elapsedTime = 0;
         this.stats.activePowerUp = null;
         this.stats.powerUpRemaining = 0;
         this.stats.powerUpDuration = 0;
@@ -214,6 +216,9 @@ export class Game {
 
         const effectiveDt = dt * this.timeScale;
 
+        // Track elapsed time
+        this.stats.elapsedTime += dt;
+
         // Timer (timed mode)
         if (this.stats.timeLimit > 0) {
             this.stats.timeRemaining -= dt;
@@ -259,11 +264,22 @@ export class Game {
             this._processShot(click.x, click.y);
         }
 
-        // Update entities
-        this.entities.update(effectiveDt, this.renderer.width, this.renderer.height, this.timeScale);
+        // Update entities (pass raw dt; EntityManager passes timeScale to chickens internally)
+        this.entities.update(dt, this.renderer.width, this.renderer.height, this.timeScale);
 
-        // Update particles
-        this.particles.update(dt);
+        // Magnet power-up: pull chickens toward screen center
+        if (this.activePowerUp && this.activePowerUp.effect === 'magnet') {
+            const cx = this.renderer.width / 2;
+            const cy = this.renderer.height * 0.4;
+            for (const c of this.entities.chickens) {
+                if (!c.active || !c.alive || c.dying) continue;
+                c.x += (cx - c.x) * 2.0 * dt;
+                c.y += (cy - c.y) * 2.0 * dt;
+            }
+        }
+
+        // Update particles (use timeScale so particles slow during slow-mo)
+        this.particles.update(dt * this.timeScale);
 
         // Update HUD
         this.stats.comboChanged = false;
@@ -295,7 +311,8 @@ export class Game {
                 if (!chicken.active || !chicken.alive) continue;
                 const dx = chicken.x - x;
                 const dy = chicken.y - y;
-                if (dx * dx + dy * dy <= radius * radius + chicken.width * chicken.width) {
+                const hitDist = radius + chicken.width * 0.6;
+                if (dx * dx + dy * dy <= hitDist * hitDist) {
                     this._hitChicken(chicken, x, y);
                     hitSomething = true;
                 }
@@ -445,6 +462,7 @@ export class Game {
         const ctx = this.renderer.ctx;
 
         this.renderer.clear();
+        this.renderer.beginFrame();
         this.renderer.renderBackground(timestamp);
 
         if (this.state === GAME_STATES.PLAYING || this.state === GAME_STATES.PAUSED) {
@@ -471,11 +489,29 @@ export class Game {
                 ctx.fillRect(0, 0, this.renderer.width, this.renderer.height);
                 ctx.restore();
             }
+
+            // Magnet visual effect
+            if (this.activePowerUp && this.activePowerUp.effect === 'magnet') {
+                ctx.save();
+                ctx.globalAlpha = 0.08;
+                ctx.fillStyle = '#FF69B4';
+                ctx.fillRect(0, 0, this.renderer.width, this.renderer.height);
+                // Pulsing ring at center
+                const pulse = Math.sin(timestamp * 0.005) * 0.3 + 0.5;
+                ctx.globalAlpha = pulse * 0.2;
+                ctx.strokeStyle = '#FF69B4';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(this.renderer.width / 2, this.renderer.height * 0.4, 80 + pulse * 40, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            }
         }
 
         this.renderer.renderForeground(timestamp);
+        this.renderer.endFrame();
 
-        // Custom crosshair (during gameplay)
+        // Custom crosshair (during gameplay, drawn outside shake transform)
         if (this.state === GAME_STATES.PLAYING) {
             this.input.renderCrosshair(ctx);
         }

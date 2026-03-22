@@ -1,0 +1,10 @@
+{
+    "name": "sky-hunter",
+    "version": "1.0.0",
+    "description": "Sky Hunter - The Ultimate Chicken Shooter Browser Game",
+    "scripts": {
+        "start": "npx serve ."
+    },
+    "keywords": ["game", "browser", "chicken-shooter"],
+    "license": "MIT"
+}

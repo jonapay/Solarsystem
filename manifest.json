@@ -1,0 +1,11 @@
+{
+    "name": "Sky Hunter",
+    "short_name": "SkyHunter",
+    "description": "The Ultimate Chicken Shooter Browser Game",
+    "start_url": "/index.html",
+    "display": "fullscreen",
+    "orientation": "landscape",
+    "background_color": "#000000",
+    "theme_color": "#FF4500",
+    "icons": []
+}
